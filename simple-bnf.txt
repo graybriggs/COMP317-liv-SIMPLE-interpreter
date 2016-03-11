@@ -1,0 +1,17 @@
+
+<variable> ::= [a-z][A-Z]
+<assignable> ::= <variable>
+<expression> ::= <numeral> | -<expression> | <expression> + <expression>
+		 <expression> - <expression> | <expression> * <expression>
+
+<boolean-expression> ::= true | false
+		     | <boolean-expression> && <boolean-expression>
+		     | <boolean-expression> || <boolean-expression>
+		     | !<boolean-expression>
+		     | <expression> < <expression>
+		     | <expression> == <expresion>
+
+<program> ::= skip | <assignable> := <expression>;
+	      | <program><program>
+	      | if (<boolean-expression>) { <program> } else { <program> }
+	      | while (<boolean-expression>) { <program> }
