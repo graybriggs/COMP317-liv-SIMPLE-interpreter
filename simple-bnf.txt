@@ -1,5 +1,5 @@
 
-<variable> ::= [a-z][A-Z]
+<variable> ::= [a-zA-Z]
 <assignable> ::= <variable>
 <expression> ::= <numeral> | -<expression> | <expression> + <expression>
 		 <expression> - <expression> | <expression> * <expression>
