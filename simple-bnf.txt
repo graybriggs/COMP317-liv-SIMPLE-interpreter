@@ -1,8 +1,9 @@
 
-<variable> ::= [a-zA-Z]
+<variable> ::= 
 <assignable> ::= <variable>
 <expression> ::= <numeral> | -<expression> | <expression> + <expression>
-		 <expression> - <expression> | <expression> * <expression>
+		| <expression> - <expression> | <expression> * <expression>
+		| <method-body>
 
 <boolean-expression> ::= true | false
 		     | <boolean-expression> && <boolean-expression>
@@ -15,3 +16,5 @@
 	      | <program><program>
 	      | if (<boolean-expression>) { <program> } else { <program> }
 	      | while (<boolean-expression>) { <program> }
+
+<method-body> ::= do { <program> return <expression> }
