@@ -84,13 +84,16 @@ var TokenType = {
     KEYWORD_TRUE  : 15,
     KEYWORD_FALSE : 16,
     KEYWORD_DO    : 17,
-    OP_ASSIGNMENT : 18,
-    OP_EQUIVALENT : 19,
-    OP_LESS_THAN  : 20,
-    OP_GREATER_THAN : 21,
-    OP_NOT        : 22,
-    SCOPE_START   : 23,
-    SCOPE_END     : 24
+    KEYWORD_SKIP  : 18,
+    OP_ASSIGNMENT : 19,
+    OP_EQUIVALENT : 20,
+    OP_LESS_THAN  : 21,
+    OP_GREATER_THAN : 22,
+    OP_GREATER_THAN_EQUAL_TO : 23,
+    OP_LESS_THAN_EQUAL_TO    : 24,
+    OP_NOT        : 25,
+    SCOPE_START   : 26,
+    SCOPE_END     : 27
 }
 
 function Token(id, tt, row, col) {
@@ -169,18 +172,6 @@ function Scanner(data) {
                     column++;
                     i++;
                     break;
-                case '<':
-                    console.log("<");
-                    this.tokens.push(new Token('<', TokenType.OP_LESS_THAN, row, column));
-                    column++;
-                    i++;
-                    break;
-                case '>':
-                    console.log(">");
-                    this.tokens.push(new Token('>', TokenType.OP_GREATER_THAN, row, column));
-                    column++;
-                    i++;
-                    break;
                 case '{':
                     console.log("{");
                     this.tokens.push(new Token('{', TokenType.SCOPE_START, row, column));
@@ -229,6 +220,8 @@ function Scanner(data) {
                             this.tokens.push(new Token(a, TokenType.KEYWORD_ELSE, row, column));
                         else if (a === "do")
                             this.tokens.push(new Token(a, TokenType.KEYWORD_ELSE, row, column));
+                        else if (a === "skip")
+                            this.tokens.push(new Token(a, TokenType.KEYWORD_SKIP, row, column));
                         else 
                             throw "Uhh...";
                         
@@ -236,6 +229,18 @@ function Scanner(data) {
                     else if (this.isIdentifier(a)) {
                         this.tokens.push(new Token(a, TokenType.IDENTIFIER, row, column));
                     }
+                    else if (this.isGreaterThanOperator(a)) {
+                        this.tokens.push(new Token(a, TokenType.OP_GREATER_THAN, row, column));
+                    }
+                    else if (this.isLessThanOperator(a)) {
+                        this.tokens.push(new Token(a, TokenType.OP_LESS_THAN, row, column));
+                    }   
+                    else if (this.isGreaterThanEqualToOperator(a)) {
+                        this.tokens.push(new Token(a, TokenType.OP_GREATER_THAN_EQUAL_TO, row, column));
+                    }
+                    else if (this.isLessThanEqualToOperator(a)) {
+                        this.tokens.push(new Token(a, TokenType.OP_LESS_THAN_EQUAL_TO, row, column));
+                    }         
                     else {
                         throw "Unidentified token: " + column + "," + row;
                     }
@@ -307,6 +312,8 @@ function Scanner(data) {
             return true;
         case "do":
             return true;
+        case "skip":
+            return true;
         default:
             break;
             
@@ -316,7 +323,7 @@ function Scanner(data) {
     
     this.isIdentifier = function(syntax) {
         
-        if (isAlpha(syntax[0]) || syntax[0] == '_') {
+        if (isAlpha(syntax[0]) || syntax[0] === '_') {
             for (var i = 1; i < syntax.length; i++) {
                 if (!isAlphaNum(syntax[i]) && syntax[i] !== '_') {
                     return false;
@@ -331,18 +338,45 @@ function Scanner(data) {
     
     this.isAssignmentOperator = function(syntax) {
         
-        if (syntax[0] == ':' && syntax[1] == '=')
+        if (syntax[0] === ':' && syntax[1] === '=')
             return true;
         else
             return false;
     }
     
     this.isEquivalenceOperator = function(syntax) {
-        if (syntax[0] == '=' && syntax[1] == '=')
+        if (syntax[0] === '=' && syntax[1] === '=')
             return true;
         else
             return false;
     }
     
+    this.isGreaterThanOperator = function(syntax) {
+        if (syntax[0] === '>')
+            return true;
+        else
+            return false;
+    }
     
+    this.isLessThanOperator = function(syntax) {
+        if (syntax[0] === '<')
+            return true;
+        else
+            return false;
+    }
+    
+    this.isGreaterThanEqualToOperator = function(syntax) {
+        if (syntax[0] === '>' && syntax[1] === '=')
+            return true;
+        else
+            return false;
+    }
+    
+    this.isLessThanEqualToOperator = function(syntax) {
+        if (syntax[0] == '<' && syntax[1] === '=')
+            return true;
+        else
+            return false;
+    }
 }
+
