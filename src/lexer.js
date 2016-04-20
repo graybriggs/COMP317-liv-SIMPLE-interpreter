@@ -88,7 +88,9 @@ var TokenType = {
     OP_EQUIVALENT : 19,
     OP_LESS_THAN  : 20,
     OP_GREATER_THAN : 21,
-    OP_NOT        : 22
+    OP_NOT        : 22,
+    SCOPE_START   : 23,
+    SCOPE_END     : 24
 }
 
 function Token(id, tt, row, col) {
@@ -179,9 +181,15 @@ function Scanner(data) {
                     column++;
                     i++;
                     break;
-                case '=':
-                    console.log("=");
-                    this.tokens.push(new Token('=', TokenType.EQUALS, row, column));
+                case '{':
+                    console.log("{");
+                    this.tokens.push(new Token('{', TokenType.SCOPE_START, row, column));
+                    column++;
+                    i++;
+                    break;
+                case '}':
+                    console.log("}");
+                    this.tokens.push(new Token('}', TokenType.SCOPE_END, row, column));
                     column++;
                     i++;
                     break;
@@ -193,6 +201,12 @@ function Scanner(data) {
                     if (a === "") {
                         console.log("something is fucked up.");
                         throw "Bad things have happened.";
+                    }
+                    else if (this.isAssignmentOperator(a)) {
+                        this.tokens.push(new Token(a, TokenType.OP_ASSIGNMENT, row, column));
+                    }
+                    else if (this.isEquivalenceOperator(a)) {
+                        this.tokens.push(new Token(a, TokenType.OP_EQUIVALENT, row, column));
                     }
                     else if (this.isReal(a)) {
                         this.tokens.push(new Token(a, TokenType.REAL, row, column));
@@ -240,7 +254,7 @@ function Scanner(data) {
         for (var i = pos; i < syntax.length; i++) {
             if (isAlphaNum(syntax[i]) || syntax[i] === '_' || syntax[i] === '>'
                                       || syntax[i] === '<' || syntax[i] === '.'
-                                      || syntax[i] === ':' ) {
+                                      || syntax[i] === ':' || syntax[i] === '=') {
                 atomLength++;                
             }
             else {
@@ -317,10 +331,17 @@ function Scanner(data) {
     
     this.isAssignmentOperator = function(syntax) {
         
+        if (syntax[0] == ':' && syntax[1] == '=')
+            return true;
+        else
+            return false;
     }
     
-    this.isEquivalenceOperator = function(sytax) {
-        
+    this.isEquivalenceOperator = function(syntax) {
+        if (syntax[0] == '=' && syntax[1] == '=')
+            return true;
+        else
+            return false;
     }
     
     
