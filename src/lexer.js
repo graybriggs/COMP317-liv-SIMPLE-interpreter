@@ -93,7 +93,8 @@ var TokenType = {
     OP_LESS_THAN_EQUAL_TO    : 24,
     OP_NOT        : 25,
     SCOPE_START   : 26,
-    SCOPE_END     : 27
+    SCOPE_END     : 27,
+    LINE_TERMINATOR : 28
 }
 
 function Token(id, tt, row, col) {
@@ -181,6 +182,12 @@ function Scanner(data) {
                 case '}':
                     console.log("}");
                     this.tokens.push(new Token('}', TokenType.SCOPE_END, row, column));
+                    column++;
+                    i++;
+                    break;
+                case ';':
+                    console.log(";");
+                    this.tokens.push(new Token(';', TokenType.LINE_TERMINATOR, row, column));
                     column++;
                     i++;
                     break;
