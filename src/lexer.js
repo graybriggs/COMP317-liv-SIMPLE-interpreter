@@ -373,7 +373,7 @@ function Scanner(data) {
     }
     
     this.isLessThanEqualToOperator = function(syntax) {
-        if (syntax[0] == '<' && syntax[1] === '=')
+        if (syntax[0] === '<' && syntax[1] === '=')
             return true;
         else
             return false;
