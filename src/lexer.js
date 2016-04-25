@@ -94,7 +94,8 @@ var TokenType = {
     OP_NOT        : 25,
     SCOPE_START   : 26,
     SCOPE_END     : 27,
-    LINE_TERMINATOR : 28
+    LINE_TERMINATOR : 28,
+    EOF : 29
 }
 
 function Token(id, tt, row, col) {
@@ -257,6 +258,7 @@ function Scanner(data) {
             }
             
         }
+        this.tokens.push(new Token("EOF", TokenType.EOF, 0, 0));
     }
     
     this.getAtom = function(syntax, pos) {
