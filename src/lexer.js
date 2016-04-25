@@ -16,10 +16,10 @@ function lexer(data) {
     var scan = new Scanner(data);
     
     scan.extractTokens();
-   
   
     scan.tokens.forEach(printTokens);
-    
+ 
+    return scan.tokens;
 }
 
 function printTokens(cur_val, index, array) {
@@ -133,13 +133,13 @@ function Scanner(data) {
                     break;
                 case ')':
                     console.log(")");
-                    this.tokens.push(new Token(')', TokenType.L_PAREN, row, column));
+                    this.tokens.push(new Token(')', TokenType.R_PAREN, row, column));
                     column++;
                     i++;
                     break;
                 case '(':
                     console.log(")");
-                    this.tokens.push(new Token('(', TokenType.R_PAREN, row, column));
+                    this.tokens.push(new Token('(', TokenType.L_PAREN, row, column));
                     column++;
                     i++;
                     break;
