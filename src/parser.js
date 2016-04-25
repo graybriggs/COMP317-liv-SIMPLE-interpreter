@@ -31,15 +31,18 @@ var TokenType = {
     OP_NOT        : 25,
     SCOPE_START   : 26,
     SCOPE_END     : 27,
-    LINE_TERMINATOR : 28
+    LINE_TERMINATOR : 28,
+    EOF : 29
 }
 
 function parser(tokenList) {
     
     var analyzer = new SyntaxAnalysis(tokenList);
     analyzer.test();
+    // start
+    //analyzer.block();
     analyzer.expression();
-    
+    console.log(analyzer.tokens);
 }
 
 function SyntaxAnalysis(tokenList) {
@@ -62,16 +65,20 @@ SyntaxAnalysis.prototype.getCurrentTokenType = function() {
 }
 
 SyntaxAnalysis.prototype.nextSymbol = function(sym) {
-    var sym = this.tokens[this.currentSymbolNumber];
-    this.currentSymbolNumber++;
-    console.log("Cur sym: " + sym.type);
+    var sym = this.tokens[this.currentSymbolNumber++];
+    
     this.currentToken = sym;
-    //return sym;
+    
+    if (sym === TokenType.EOF) {
+        console.log("EOF");
+        throw "end.";
+    }        
 }
 
 SyntaxAnalysis.prototype.accept = function(symType) {
     
-    if (this.getCurrentTokenType() === symType) {
+    if (this.getCurrentToken().type === symType) {
+        console.log("ACCEPTED: " + this.getCurrentTokenType());
         this.nextSymbol();
         return true;
     }
@@ -79,8 +86,28 @@ SyntaxAnalysis.prototype.accept = function(symType) {
         return false;
 }
 
+SyntaxAnalysis.prototype.expect = function(symType) {
+    
+    if (this.getCurrentTokenType() === symType) {
+        return true;
+    }
+    else {
+        return false;
+    }
+}
+
 
 SyntaxAnalysis.prototype.factor = function() {
+    
+    console.log("Getting FACTOR");
+    
+    // optional
+    if (this.expect(TokenType.MINUS)) {
+        console.log("minus");
+        this.accept(TokenType.MINUS);
+
+        this.factor();
+    }
     
     if (this.accept(TokenType.INTEGER)) {
         console.log("INT");
@@ -99,6 +126,9 @@ SyntaxAnalysis.prototype.factor = function() {
         this.accept(TokenType.R_PAREN);
         console.log("R_PAREN");
     }
+    else if (this.accept(TokenType.EOF)) {
+        throw "Reached EOF";
+    }
     else {
         throw "Impossible...";
     }
@@ -110,13 +140,8 @@ SyntaxAnalysis.prototype.term = function() {
     
     this.factor();
     
-    
-    if (this.getCurrentTokenType() === TokenType.MULTIPLICATION)
-        console.log("MULT");
-    else if (this.getCurrentTokenType() === TokenType.DIVISION)
-        console.log("DIVISION");
-    
-    while (this.accept(TokenType.MULTIPLICATION) || this.accept(TokenType.DIVISION)) {
+    while (this.accept(TokenType.MULTIPLICATION) || this.accept(TokenType.DIVISION)
+                                                 || this.accept(TokenType.MODULUS)) {
         this.factor();        
     }
 }
@@ -124,12 +149,6 @@ SyntaxAnalysis.prototype.term = function() {
 SyntaxAnalysis.prototype.expression = function() {
     
     this.term();
-    console.log(this.currentSymbolNumber);
-    
-    if (this.getCurrentTokenType() === TokenType.PLUS)
-        console.log("PLUS");
-    else if (this.getCurrentTokenType() === TokenType.MINUS)
-        console.log("minus");
     
     while (this.accept(TokenType.PLUS) || this.accept(TokenType.MINUS)) {
         this.term();
@@ -137,22 +156,96 @@ SyntaxAnalysis.prototype.expression = function() {
     
 }
 
-function variableAssignment() {
+SyntaxAnalysis.prototype.variableAssignment = function() {
+    
+    console.log("In var assignment");
+    
+    if (this.accept(TokenType.IDENTIFIER)) {
+        
+        if (this.accept(TokenType.OP_ASSIGNMENT)) {
+            
+            this.expression();
+            
+            this.accept(TokenType.LINE_TERMINATOR);
+            console.log("Well formed variable assignment.");
+        }
+    }
     
 }
 
-function ifElseStatement() {
+SyntaxAnalysis.prototype.booleanExpression = function() {
     
 }
 
-function ifStatement() {
+SyntaxAnalysis.prototype.ifStatement = function() {
     
+    /*
+     *  if (a > b) {
+     *     // block ...
+     *  }
+     */
+    
+    console.log("Doing if statement");
+    
+    if (this.accept(TokenType.KEYWORD_IF)) {
+        this.accept(TokenType.L_PAREN);
+        
+        //this.booleanExpression();
+        this.expression();
+        //        this.nextSymbol();
+        
+        this.accept(TokenType.R_PAREN);
+        
+        this.accept(TokenType.SCOPE_START);
+        
+        this.block();
+        
+        this.accept(TokenType.SCOPE_END);
+        console.log("ACCEPTED IF STATEMENT");
+    }
+    
+    if (this.expect(TokenType.KEYWORD_ELSE)) {
+        
+        elseStatement();
+    }
 }
 
-function whileStatement() {
+SyntaxAnalysis.prototype.elseStatement = function() {
     
+    this.accept(TokenType.KEYWORD_ELSE);
+    
+    this.accept(TokenType.SCOPE_START);
+    
+    this.block();
+    
+    this.accept(TokenType.SCOPE_END);
+    console.log("ACCEPTED ELSE STATEMENT");
 }
 
-function block() {
+SyntaxAnalysis.prototype.whileStatement = function() {
+    
+
+}
+
+SyntaxAnalysis.prototype.block = function() {
+    
+    console.log("In BLOCK");
+    
+    var tok = this.getCurrentTokenType();
+    while (this.expect(TokenType.IDENTIFIER) || this.expect(TokenType.KEYWORD_IF)
+                                             || this.expect(TokenType.KEYWORD_WHILE)) {
+        if (this.accept(TokenType.IDENTIFIER)) {
+            console.log("Doing variable assignment");
+            this.variableAssignment();
+        }
+        else if (this.accept(TokenType.KEYWORD_IF)) {
+            console.log("If statement");
+            this.ifStatement();
+        }
+        else if (this.accept(TokenType.KEYWORD_WHILE)) {
+            console.log("while statement");
+            this.whileStatement();
+        }                                     
+    }
     
 }
