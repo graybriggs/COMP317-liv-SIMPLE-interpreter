@@ -2,6 +2,11 @@
 
 //import {TokenType} from 'lexer.js'
 
+function errorRowColumn(obj, msg) {
+    throw msg + ": " + obj.getCurrentToken().column + "," + obj.getCurrentToken().row;
+}
+
+
 var TokenType = {
     L_PAREN : 0,
     R_PAREN : 1,
@@ -37,11 +42,11 @@ var TokenType = {
 
 function parser(tokenList) {
     
+    console.log("--- Parsing ---");
     var analyzer = new SyntaxAnalysis(tokenList);
-    analyzer.test();
     // start
-    //analyzer.block();
-    analyzer.expression();
+    analyzer.block();
+    //analyzer.expression();
     console.log(analyzer.tokens);
 }
 
@@ -50,10 +55,7 @@ function SyntaxAnalysis(tokenList) {
     this.tokens = tokenList;
     this.currentSymbolNumber = 0;
     this.currentToken = this.tokens[this.currentSymbolNumber];
-    
-    this.test = function() {
-        console.log("hi from the parser");
-    }
+    console.log("Starting SYMBOL: " + this.tokens[0].id);
 }
 
 SyntaxAnalysis.prototype.getCurrentToken = function() {
@@ -65,11 +67,15 @@ SyntaxAnalysis.prototype.getCurrentTokenType = function() {
 }
 
 SyntaxAnalysis.prototype.nextSymbol = function(sym) {
-    var sym = this.tokens[this.currentSymbolNumber++];
+    
+    this.currentSymbolNumber++;
+    var sym = this.tokens[this.currentSymbolNumber];
     
     this.currentToken = sym;
     
-    if (sym === TokenType.EOF) {
+    console.log("CURRENT SYMBOL: " + this.getCurrentToken().id);
+    
+    if (sym.type === TokenType.EOF) {
         console.log("EOF");
         throw "end.";
     }        
@@ -78,7 +84,6 @@ SyntaxAnalysis.prototype.nextSymbol = function(sym) {
 SyntaxAnalysis.prototype.accept = function(symType) {
     
     if (this.getCurrentToken().type === symType) {
-        console.log("ACCEPTED: " + this.getCurrentTokenType());
         this.nextSymbol();
         return true;
     }
@@ -99,7 +104,7 @@ SyntaxAnalysis.prototype.expect = function(symType) {
 
 SyntaxAnalysis.prototype.factor = function() {
     
-    console.log("Getting FACTOR");
+    console.log("FACTOR");
     
     // optional
     if (this.expect(TokenType.MINUS)) {
@@ -133,10 +138,11 @@ SyntaxAnalysis.prototype.factor = function() {
         throw "Impossible...";
     }
     
-    this.nextSymbol();
 }
 
 SyntaxAnalysis.prototype.term = function() {
+    
+    console.log("TERM");
     
     this.factor();
     
@@ -148,6 +154,8 @@ SyntaxAnalysis.prototype.term = function() {
 
 SyntaxAnalysis.prototype.expression = function() {
     
+    console.log("EXPRESSION");
+    
     this.term();
     
     while (this.accept(TokenType.PLUS) || this.accept(TokenType.MINUS)) {
@@ -158,17 +166,24 @@ SyntaxAnalysis.prototype.expression = function() {
 
 SyntaxAnalysis.prototype.variableAssignment = function() {
     
-    console.log("In var assignment");
-    
     if (this.accept(TokenType.IDENTIFIER)) {
-        
+        console.log("mhm");
         if (this.accept(TokenType.OP_ASSIGNMENT)) {
-            
+            console.log("one");
             this.expression();
-            
-            this.accept(TokenType.LINE_TERMINATOR);
+            console.log("two");
+            if(!this.accept(TokenType.LINE_TERMINATOR)) {
+                errorRowColumn(this, "Missing terminator at");
+            }
             console.log("Well formed variable assignment.");
         }
+        else {
+            //throw "Expected assignment at " + this.getCurrentToken().col + "," + this.getCurrentToken().row;
+            errorRowColumn(this, "Expected assignment at");
+        }
+    }
+    else {
+        errorRowColumn(this, "Missing terminator at");
     }
     
 }
@@ -183,6 +198,10 @@ SyntaxAnalysis.prototype.ifStatement = function() {
      *  if (a > b) {
      *     // block ...
      *  }
+     *  // optional
+     *  else {
+     *     // block ...
+     *  }
      */
     
     console.log("Doing if statement");
@@ -192,7 +211,6 @@ SyntaxAnalysis.prototype.ifStatement = function() {
         
         //this.booleanExpression();
         this.expression();
-        //        this.nextSymbol();
         
         this.accept(TokenType.R_PAREN);
         
@@ -205,8 +223,7 @@ SyntaxAnalysis.prototype.ifStatement = function() {
     }
     
     if (this.expect(TokenType.KEYWORD_ELSE)) {
-        
-        elseStatement();
+        this.elseStatement();
     }
 }
 
@@ -224,25 +241,29 @@ SyntaxAnalysis.prototype.elseStatement = function() {
 
 SyntaxAnalysis.prototype.whileStatement = function() {
     
-
+    this.accept(TokenType.KEYWORD_WHILE);
+    this.accept(TokenType.SCOPE_START);
+    
+    this.block();
+    
+    this.accept(TokenType.SCOPE_END);
 }
 
 SyntaxAnalysis.prototype.block = function() {
     
     console.log("In BLOCK");
     
-    var tok = this.getCurrentTokenType();
     while (this.expect(TokenType.IDENTIFIER) || this.expect(TokenType.KEYWORD_IF)
                                              || this.expect(TokenType.KEYWORD_WHILE)) {
-        if (this.accept(TokenType.IDENTIFIER)) {
+        if (this.expect(TokenType.IDENTIFIER)) {
             console.log("Doing variable assignment");
             this.variableAssignment();
         }
-        else if (this.accept(TokenType.KEYWORD_IF)) {
+        else if (this.expect(TokenType.KEYWORD_IF)) {
             console.log("If statement");
             this.ifStatement();
         }
-        else if (this.accept(TokenType.KEYWORD_WHILE)) {
+        else if (this.expect(TokenType.KEYWORD_WHILE)) {
             console.log("while statement");
             this.whileStatement();
         }                                     
