@@ -1,4 +1,9 @@
 
+// Parser for syntatic analysis that builds an ast and evaluates code
+// Web based assembly language generator for a BASIC-like programming language
+// Graham Briggs
+// April 2016
+
 
 //import {TokenType} from 'lexer.js'
 
@@ -74,12 +79,7 @@ SyntaxAnalysis.prototype.nextSymbol = function(sym) {
     this.currentToken = sym;
     
     console.log("CURRENT SYMBOL: " + this.getCurrentToken().id);
-    
-    if (sym.type === TokenType.EOF) {
-        console.log("EOF");
-        //throw "end.";
-        return;
-    }        
+           
 }
 
 SyntaxAnalysis.prototype.accept = function(symType) {
@@ -110,22 +110,15 @@ SyntaxAnalysis.prototype.getPreviousToken = function() {
 
 SyntaxAnalysis.prototype.factor = function() {
     
-    console.log("FACTOR");
-    
     // optional
     if (this.expect(TokenType.MINUS)) {
-        console.log("minus");
         this.accept(TokenType.MINUS);
 
         this.factor();
     }
     
     if (this.accept(TokenType.INTEGER)) {
-        console.log("INT");
-        
-        var i = new Integer(parseInt(this.getPreviousToken()));
-        console.log("-----> " + i.value);
-        return i.value;
+        return new Integer(parseInt(this.getPreviousToken()));;
     }
     else if (this.accept(TokenType.REAL)) {
         console.log("REAL");
@@ -154,57 +147,78 @@ SyntaxAnalysis.prototype.factor = function() {
 
 SyntaxAnalysis.prototype.term = function() {
     
-    console.log("TERM");
+    var lhs = this.factor();
+    var operator = null;
     
-    lhs = this.factor();
-    
-    while (this.accept(TokenType.MULTIPLICATION) || this.accept(TokenType.DIVISION)
-                                                 || this.accept(TokenType.MODULUS)) {                                               
-        this.factor();        
+    if (!this.expect(TokenType.EOF)) {
+        
+        while (this.expect(TokenType.MULTIPLICATION) || this.expect(TokenType.DIVISION)
+                                                    || this.expect(TokenType.MODULUS)) {
+                                                        
+            if (this.accept(TokenType.MULTIPLICATION)) {
+                var rhs = this.expression();
+                
+                operator = new Multiplication(lhs.result(), rhs.result());
+            }
+            else if (this.accept(TokenType.DIVISION)) {
+                var rhs = this.expression();
+                
+                operator = new Division(lhs.result(), rhs.result());
+            }
+            else if (this.accept(TokenType.MODULUS)) {
+                var rhs = this.expression();
+                
+                operator = new Modulus(lhs.result(), rhs.result());
+            }                                                        
+                                                                                                        
+            //rhs = this.factor();        
+        }
+        
+        if (operator === null) {
+            return lhs.result();
+        }
+        else {
+            return operator;
+        }
     }
-    
-    return lhs;
+    else {
+        return lhs;
+    }
 }
 
 SyntaxAnalysis.prototype.expression = function() {
     
-    console.log("EXPRESSION");
-    
     var lhs = this.term();
     var operator = null;
     
-    while (this.expect(TokenType.PLUS) || this.expect(TokenType.MINUS)) {
+    if (!this.expect(TokenType.EOF)) {
         
-        if (this.accept(TokenType.PLUS)) {
-            console.log("addition");
-            var rhs = this.expression();
-            console.log("RHS: " + rhs);
-            operator = new Addition(lhs, rhs);
-            console.log("op: " + operator.result());
+        while (this.expect(TokenType.PLUS) || this.expect(TokenType.MINUS)) {
+            
+            if (this.accept(TokenType.PLUS)) {
+                var rhs = this.expression();
+
+                operator = new Addition(lhs.result(), rhs.result());
+            }
+            else if (this.accept(TokenType.MINUS)) {
+                var rhs = this.expression();
+                operator = new Subtraction(lhs, rhs);
+            }
+            
+            //rhs = this.term();
         }
-        else if (this.accept(TokenType.MINUS)) {
-            console.log("Subtraction");
-            var rhs = this.expression();
-            console.log("RHS: " + rhs);
-            operator = new Subtraction(lhs, rhs);
-            console.log("op: " + operator.result());
+            
+        if (operator === null) {
+            console.log(lhs);
+            return lhs;
         }
-        
-        rhs = this.term();
-    }
-    
-    
-    if (operator === null) {
-        console.log(lhs);
-        return lhs;
+        else {
+            return operator;
+        }
     }
     else {
-        console.log("before return: " + operator.result());
-        return operator;
+        return lhs;
     }
-    
-    //var res = new Addition(lhs, rhs);
-    //console.log("RESULT: " + res.result());    
 }
 
 SyntaxAnalysis.prototype.variableAssignment = function() {
@@ -212,20 +226,19 @@ SyntaxAnalysis.prototype.variableAssignment = function() {
     if (this.accept(TokenType.IDENTIFIER)) {
         if (this.accept(TokenType.OP_ASSIGNMENT)) {
             this.expression();
+            
             if(!this.accept(TokenType.LINE_TERMINATOR)) {
                 errorRowColumn(this, "Missing terminator at");
             }
             console.log("Well formed variable assignment.");
         }
         else {
-            //throw "Expected assignment at " + this.getCurrentToken().col + "," + this.getCurrentToken().row;
             errorRowColumn(this, "Expected assignment at");
         }
     }
     else {
         errorRowColumn(this, "Missing terminator at");
     }
-    
 }
 
 SyntaxAnalysis.prototype.booleanExpression = function() {
@@ -335,18 +348,28 @@ SyntaxAnalysis.prototype.block = function() {
 /////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////
 
-
+/*
+ * AST objects
+ */
 // The fundamental types store the raw values of the data
 // the operations execute the behaviour of those raw values.
 
 function Integer(val) {
     
     this.value = val;
+    
+    this.result = function() {
+        return this.value;
+    }
 }
 
 function Real(val) {
     
     this.value = val;
+    
+    this.result = function() {
+        return this.value;
+    }
 }
 
 function Addition(lhs, rhs) {
