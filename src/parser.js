@@ -118,10 +118,10 @@ SyntaxAnalysis.prototype.factor = function() {
     }
     
     if (this.accept(TokenType.INTEGER)) {
-        return new Integer(parseInt(this.getPreviousToken()));;
+        return new Integer(parseInt(this.getPreviousToken()));
     }
     else if (this.accept(TokenType.REAL)) {
-        console.log("REAL");
+        return new Real(parseFloat(this.getPreviousToken()))
     }
     else if (this.accept(TokenType.IDENTIFIER)) {
         console.log("IDENT");
@@ -129,10 +129,11 @@ SyntaxAnalysis.prototype.factor = function() {
     else if (this.accept(TokenType.L_PAREN)) {
         console.log("L_PAREN");
         
-        this.expression();
+        var exp = this.expression();
         
         this.accept(TokenType.R_PAREN);
         console.log("R_PAREN");
+        return exp;
     }
     else if (this.accept(TokenType.EOF)) {
         //throw "Reached EOF";
@@ -153,29 +154,26 @@ SyntaxAnalysis.prototype.term = function() {
     if (!this.expect(TokenType.EOF)) {
         
         while (this.expect(TokenType.MULTIPLICATION) || this.expect(TokenType.DIVISION)
-                                                    || this.expect(TokenType.MODULUS)) {
+                                                     || this.expect(TokenType.MODULUS)) {
                                                         
             if (this.accept(TokenType.MULTIPLICATION)) {
-                var rhs = this.expression();
-                
+                var rhs = this.term();
                 operator = new Multiplication(lhs.result(), rhs.result());
             }
             else if (this.accept(TokenType.DIVISION)) {
-                var rhs = this.expression();
+                var rhs = this.term();
                 
-                operator = new Division(lhs.result(), rhs.result());
+                operator = new Division(lhs, rhs);
             }
             else if (this.accept(TokenType.MODULUS)) {
-                var rhs = this.expression();
+                var rhs = this.term();
                 
-                operator = new Modulus(lhs.result(), rhs.result());
-            }                                                        
-                                                                                                        
-            //rhs = this.factor();        
+                operator = new Modulus(lhs, rhs);
+            }                                                                
         }
         
         if (operator === null) {
-            return lhs.result();
+            return lhs;
         }
         else {
             return operator;
@@ -204,8 +202,6 @@ SyntaxAnalysis.prototype.expression = function() {
                 var rhs = this.expression();
                 operator = new Subtraction(lhs, rhs);
             }
-            
-            //rhs = this.term();
         }
             
         if (operator === null) {
@@ -213,10 +209,12 @@ SyntaxAnalysis.prototype.expression = function() {
             return lhs;
         }
         else {
+            console.log("expression result [operator]: " + operator.result());
             return operator;
         }
     }
     else {
+        console.log("expression result [return]: " + lhs.result());
         return lhs;
     }
 }
@@ -378,7 +376,6 @@ function Addition(lhs, rhs) {
     this.rhs = rhs;
     
     this.result = function() {
-        console.log("lhs: " + this.lhs + ", rhs: " + this.rhs);
         return this.lhs + this.rhs;
     }
 }
@@ -389,7 +386,6 @@ function Subtraction(lhs, rhs) {
     this.rhs = rhs;
     
     this.result = function() {
-        console.log("lhs: " + this.lhs + ", rhs: " + this.rhs);
         return this.lhs - this.rhs;
     }
 }
@@ -400,7 +396,6 @@ function Multiplication(lhs, rhs) {
     this.rhs = rhs;
     
     this.result = function() {
-        console.log("lhs: " + this.lhs + ", rhs: " + this.rhs);
         return this.lhs * this.rhs;
     }
 }
@@ -411,7 +406,6 @@ function Division(lhs, rhs) {
     this.rhs = rhs;
     
     this.result = function() {
-        console.log("lhs: " + this.lhs + ", rhs: " + this.rhs);
         return this.lhs / this.rhs;
     }
 }
@@ -422,7 +416,6 @@ function Modulus(lhs, rhs) {
     this.rhs = rhs;
     
     this.result = function() {
-        console.log("lhs: " + this.lhs + ", rhs: " + this.rhs);
         return this.lhs % this.rhs;
     }
 }
