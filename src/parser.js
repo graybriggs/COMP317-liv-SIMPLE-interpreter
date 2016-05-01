@@ -45,6 +45,33 @@ var TokenType = {
     EOF : 29
 }
 
+/////////////////////////////////////
+/////////////////////////////////////
+
+// Identifier binding
+
+
+var identMap = (function(){
+    var identifiers = {};
+    
+    return {
+        dbgPrintIdentMap() {
+            console.log(identifiers);
+        },
+        addIdent: function(name, value) {
+            identifiers[name] = value;
+        },
+        getIdentValue: function(name) {
+            return identifiers[name];
+        }
+    }
+}());
+
+////////////////////////////////////
+////////////////////////////////////
+
+// Parser
+
 function parser(tokenList) {
     
     console.log("--- Parsing ---");
@@ -108,7 +135,7 @@ SyntaxAnalysis.prototype.getPreviousToken = function() {
 }
 
 SyntaxAnalysis.prototype.tokenLookahead = function(howMany) {
-    return this.tokens[this.currentSymbolNumber + howMany].id;
+    return this.tokens[this.currentSymbolNumber + howMany];
 }
 
 SyntaxAnalysis.prototype.factor = function() {
@@ -131,9 +158,10 @@ SyntaxAnalysis.prototype.factor = function() {
         console.log("ident: " + this.getPreviousToken());
         
         console.log("IDENT");
-        console.log(identMap);
+        console.log(identMap.dbgPrintIdentMap());
         
-        var idVal = getIdentValue(this.getPreviousToken());
+        //var idVal = getIdentValue(this.getPreviousToken());
+        var idVal = identMap.getIdentValue(this.getPreviousToken());
         console.log("Idval: " + idVal);
         
         return new Integer(idVal); 
@@ -246,7 +274,7 @@ SyntaxAnalysis.prototype.variableAssignment = function() {
                 errorRowColumn(this, "Missing terminator at");
             }
             console.log("Well formed variable assignment.");
-            addIdent(identTokenName, expResult.result());
+            identMap.addIdent(identTokenName, expResult.result());
         }
         else {
             errorRowColumn(this, "Expected assignment at");
@@ -345,12 +373,9 @@ SyntaxAnalysis.prototype.block = function() {
                                              || this.expect(TokenType.IDENTIFIER)
                                              || this.expect(TokenType.L_PAREN)) {
                                                  
-        if (this.expect(TokenType.IDENTIFIER)) {
-            // FIX HERE !!!!!!!!
-                //if (this.tokenLookahead(1) === TokenType.OP_ASSIGNMENT) {
-                    console.log("Doing variable assignment");
-                    this.variableAssignment();
-                //}
+        if (this.expect(TokenType.IDENTIFIER) && this.tokenLookahead(1).type === TokenType.OP_ASSIGNMENT) {
+            console.log("Doing variable assignment");
+            this.variableAssignment();
         }
         else if (this.expect(TokenType.KEYWORD_IF)) {
             console.log("If statement");
@@ -459,17 +484,3 @@ function Identifier(name) {
 }
 
 
-/////////////////////////////////////
-/////////////////////////////////////
-
-// Identifier binding
-
-var identMap = {};
-
-function addIdent(name, value) {
-    identMap[name] = value;
-}
-
-function getIdentValue(name) {
-    return identMap[name];
-}
