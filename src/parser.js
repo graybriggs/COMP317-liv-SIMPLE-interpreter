@@ -50,9 +50,9 @@ function parser(tokenList) {
     console.log("--- Parsing ---");
     var analyzer = new SyntaxAnalysis(tokenList);
     // start
-    //analyzer.block();
-    analyzer.expression();
-    console.log(analyzer.tokens);
+    analyzer.block();
+    //analyzer.expression();
+    //console.log(analyzer.tokens);
 }
 
 function SyntaxAnalysis(tokenList) {
@@ -107,6 +107,9 @@ SyntaxAnalysis.prototype.getPreviousToken = function() {
     return this.tokens[this.currentSymbolNumber - 1].id;
 }
 
+SyntaxAnalysis.prototype.tokenLookahead = function(howMany) {
+    return this.tokens[this.currentSymbolNumber + howMany].id;
+}
 
 SyntaxAnalysis.prototype.factor = function() {
     
@@ -124,7 +127,18 @@ SyntaxAnalysis.prototype.factor = function() {
         return new Real(parseFloat(this.getPreviousToken()))
     }
     else if (this.accept(TokenType.IDENTIFIER)) {
+        
+        console.log("ident: " + this.getPreviousToken());
+        
         console.log("IDENT");
+        console.log(identMap);
+        
+        var idVal = getIdentValue(this.getPreviousToken());
+        console.log("Idval: " + idVal);
+        
+        return new Integer(idVal); 
+        
+        
     }
     else if (this.accept(TokenType.L_PAREN)) {
         console.log("L_PAREN");
@@ -222,13 +236,17 @@ SyntaxAnalysis.prototype.expression = function() {
 SyntaxAnalysis.prototype.variableAssignment = function() {
     
     if (this.accept(TokenType.IDENTIFIER)) {
+        console.log("var lhs is: " + this.getPreviousToken());
+        var identTokenName = this.getPreviousToken();
+        
         if (this.accept(TokenType.OP_ASSIGNMENT)) {
-            this.expression();
+            var expResult = this.expression();
             
             if(!this.accept(TokenType.LINE_TERMINATOR)) {
                 errorRowColumn(this, "Missing terminator at");
             }
             console.log("Well formed variable assignment.");
+            addIdent(identTokenName, expResult.result());
         }
         else {
             errorRowColumn(this, "Expected assignment at");
@@ -321,10 +339,18 @@ SyntaxAnalysis.prototype.block = function() {
     
     while (this.expect(TokenType.IDENTIFIER) || this.expect(TokenType.KEYWORD_IF)
                                              || this.expect(TokenType.KEYWORD_WHILE)
-                                             || this.expect(TokenType.KEYWORD_SKIP)) {
+                                             || this.expect(TokenType.KEYWORD_SKIP)
+                                             || this.expect(TokenType.INTEGER)
+                                             || this.expect(TokenType.REAL)
+                                             || this.expect(TokenType.IDENTIFIER)
+                                             || this.expect(TokenType.L_PAREN)) {
+                                                 
         if (this.expect(TokenType.IDENTIFIER)) {
-            console.log("Doing variable assignment");
-            this.variableAssignment();
+            // FIX HERE !!!!!!!!
+                //if (this.tokenLookahead(1) === TokenType.OP_ASSIGNMENT) {
+                    console.log("Doing variable assignment");
+                    this.variableAssignment();
+                //}
         }
         else if (this.expect(TokenType.KEYWORD_IF)) {
             console.log("If statement");
@@ -336,6 +362,10 @@ SyntaxAnalysis.prototype.block = function() {
         }
         else if (this.expect(TokenType.KEYWORD_SKIP)) {
             this.accept(TokenType.KEYWORD_SKIP);
+        }
+        else {
+            var res = this.expression();
+            console.log(res);
         }
     }
     
@@ -418,4 +448,28 @@ function Modulus(lhs, rhs) {
     this.result = function() {
         return this.lhs % this.rhs;
     }
+}
+
+function Identifier(name) {
+    this.name = name;
+    
+    this.result = function() {
+        
+    }
+}
+
+
+/////////////////////////////////////
+/////////////////////////////////////
+
+// Identifier binding
+
+var identMap = {};
+
+function addIdent(name, value) {
+    identMap[name] = value;
+}
+
+function getIdentValue(name) {
+    return identMap[name];
 }
