@@ -1,0 +1,44 @@
+fmod SIMPL is pr INT .
+	      pr QID * (sort Id to Variable) .
+
+  sorts Exp BExp Program .
+  subsorts Variable Int < Exp .
+
+  op _+_ : Exp Exp -> Exp .
+  op _*_ : Exp Exp -> Exp .
+  op  -_ : Exp -> Exp .
+
+  ops true false : -> BExp .
+  op _<_ : Exp Exp -> BExp .
+  op _==_ : Exp Exp -> BExp .
+  op !_ : BExp -> BExp .
+  op _&&_ : BExp BExp -> BExp .
+  op _||_ : BExp BExp -> BExp .
+
+  op skip : -> Program .
+  op _:=_; : Variable Exp -> Program .
+  op _ _ Program Program -> Program .
+  op if (_) {_} else {_} : BExp Program Program -> Program .
+  op while(_) {_} : BExp Program -> Program .
+
+endfm
+
+*** theory of storage ***
+
+th STATE is pr INT .
+	    pr QID * (sort Id to Variable) .
+
+  sort State .
+
+  op _(_) : State Variable -> Int .
+  op _[_<-_] : State Variable Int -> State .
+
+  vars X1 X2 : Variable .
+  var S : State .
+  var I : Int .
+
+  eq (S[X1 <- I])(X1) = I .
+  cq (S[X1 <- I])(X2) = S(X2) if X1 =/= X2 .
+
+endth
+
