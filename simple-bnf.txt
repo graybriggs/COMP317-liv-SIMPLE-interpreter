@@ -1,6 +1,13 @@
 
-<variable> ::= 
-<assignable> ::= <variable>
+<num> ::= [1-9] | 0
+<numeral> ::= <num><numeral>
+
+<char> ::= <ident-char> | [.-!"£$%^&*()#'~;:\|]
+<string> ::= "<char><string>" | "<numeral><string>"
+
+<ident-char> ::= [a-zA-Z] | _
+<variable> ::= <ident-char><variable> | <variable><numeral>
+
 <expression> ::= <numeral> | -<expression> | <expression> + <expression>
 		| <expression> - <expression> | <expression> * <expression>
 		| <method-body>
@@ -12,9 +19,13 @@
 		     | <expression> < <expression>
 		     | <expression> == <expresion>
 
-<program> ::= skip | <assignable> := <expression>;
-	      | <program><program>
+<program> ::= skip | <variable> := <expression>;
+	      | <program> <program>
 	      | if (<boolean-expression>) { <program> } else { <program> }
 	      | while (<boolean-expression>) { <program> }
 
 <method-body> ::= do { <program> return <expression> }
+
+<throw> ::= throwException(<string>)
+<exception> ::= try { <program> } catchException { <program> }
+
