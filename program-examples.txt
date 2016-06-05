@@ -1,0 +1,24 @@
+
+someInt = 10
+someReal = 3.14
+
+while (someInt > someReal) {
+  someInt := someInt - 1
+}
+
+------------------------
+
+function aNumber(skip) {
+  return 5
+}
+
+function doubleMe(number) {
+  return 2 * number
+}
+
+num := call aNumber
+result := call doubleMe(num)
+
+-------------------------
+
+
