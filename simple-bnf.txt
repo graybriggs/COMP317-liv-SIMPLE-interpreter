@@ -2,8 +2,8 @@
 <num> ::= [1-9] | 0
 <numeral> ::= <num><numeral>
 
-<char> ::= <ident-char> | [.-!"£$%^&*()#'~;:\|]
-<string> ::= "<char><string>" | "<numeral><string>"
+<char> ::= <ident-char> 
+<string> ::= "<char>" | "<char><string>" | "<numeral><string>"
 
 <ident-char> ::= [a-zA-Z] | _
 <variable> ::= <ident-char><variable> | <variable><numeral>
@@ -23,6 +23,12 @@
 	      | <program> <program>
 	      | if (<boolean-expression>) { <program> } else { <program> }
 	      | while (<boolean-expression>) { <program> }
+	      | call <function-name>
+// extended
+
+<fun-arguments> ::= <variable> | <variable>, <function-arguments> | skip
+<fun-name> ::= <ident-char><fun-name> | <fun-name><numeral>
+<function> ::= function <function-name> (<function-arguments>) { <program> }
 
 <method-body> ::= do { <program> return <expression> }
 
