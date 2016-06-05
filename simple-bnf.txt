@@ -10,7 +10,7 @@
 
 <expression> ::= <numeral> | -<expression> | <expression> + <expression>
 		| <expression> - <expression> | <expression> * <expression>
-		| <method-body>
+		| <method-body> | call <function-name>
 
 <boolean-expression> ::= true | false
 		     | <boolean-expression> && <boolean-expression>
@@ -23,7 +23,7 @@
 	      | <program> <program>
 	      | if (<boolean-expression>) { <program> } else { <program> }
 	      | while (<boolean-expression>) { <program> }
-	      | call <function-name>
+
 // extended
 
 <fun-arguments> ::= <variable> | <variable>, <function-arguments> | skip
