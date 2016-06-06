@@ -483,4 +483,41 @@ function Identifier(name) {
     }
 }
 
+////////////////
 
+function WhileLoop(cond, body) {
+
+	this.condition = cond; // boolExpr
+	this.body = body
+}
+
+////////////////
+
+function IfStatement(cond, body) {
+
+	this.condition = cond; // boolExpr
+	this.body = body;
+}
+
+////////////////
+
+function IfElseStatement(cond, body1, body2) {
+
+	this.condition = cond; // boolExpr
+
+	this.bodyIf= body1;
+	this.bodyElse = body2;
+}
+
+///////////////
+
+function Block() {
+	this.subBlock = [];
+}
+
+Block.prototype.addBlock(block) {
+	this.subBlock.push(block);
+}
+
+
+///////////////
