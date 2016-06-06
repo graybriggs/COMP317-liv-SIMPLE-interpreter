@@ -12,7 +12,7 @@
 		| <expression> - <expression> | <expression> * <expression>
 		| <method-body> | call <function-name>
 
-<boolean-expression> ::= true | false
+<boolean-expression> ::= true | false | <expression>
 		     | <boolean-expression> && <boolean-expression>
 		     | <boolean-expression> || <boolean-expression>
 		     | !<boolean-expression>
