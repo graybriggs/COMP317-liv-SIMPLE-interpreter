@@ -26,6 +26,9 @@
 
 // extended
 
+<array-decl> ::= <variable> := [<numeral>]
+<array-access> ::= <variable>[<expression>]
+
 <fun-arguments> ::= <variable> | <variable>, <function-arguments> | skip
 <fun-name> ::= <ident-char><fun-name> | <fun-name><numeral>
 <function> ::= function <function-name> (<function-arguments>) { <program> }

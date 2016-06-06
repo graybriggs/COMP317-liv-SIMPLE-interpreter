@@ -21,4 +21,17 @@ result := call doubleMe(num)
 
 -------------------------
 
+my_array := [10]
 
+i := 0
+while (i < 10) {
+  my_array[i] := i
+}
+
+sum := 0
+
+while (i < 10) {
+  sum := sum + my_array[i]
+}
+
+---------
