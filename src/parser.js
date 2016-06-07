@@ -77,9 +77,13 @@ function parser(tokenList) {
     console.log("--- Parsing ---");
     var analyzer = new SyntaxAnalysis(tokenList);
     // start
-    analyzer.block();
+    //analyzer.block();
+    var bres = analyzer.booleanExpression();
     //analyzer.expression();
-    //console.log(analyzer.tokens);
+    console.log("-- booleanExpression() result: ");
+    console.log(bres);
+    console.log("-- Analyzer Tokens --");
+    console.log(analyzer.tokens);
 }
 
 function SyntaxAnalysis(tokenList) {
@@ -295,38 +299,46 @@ SyntaxAnalysis.prototype.booleanExpression = function() {
     if (!this.expect(TokenType.EOF)) {
 
         if (this.accept(TokenType.KEYWORD_TRUE)) {
-            lhs = BooleanExpression(true);
+            lhs = new BoolExpression(true);
         }
         else if (this.accept(TokenType.KEYWORD_FALSE)) {
-            lhs = BooleanExpression(false);
+            lhs = new BoolExpression(false);
         }
         else if (this.accept(TokenType.INTEGER) || this.accept(TokenType.IDENTIFIER)) {
-            lhs = this.expression();
+            //lhs = this.expression();
         }
         else {
-            lhs = booleanExpression();
+            //lhs = this.booleanExpression();
+            lhs = null;
         }
-
-        while (this.expect(TokenType.OP_EQUIVALENT) || this.expect(TokenType.OP_EQUIVALENT)
-                                                    || this.expect(TokenType.OP_LESS_THAN)
+        
+        while (this.expect(TokenType.OP_EQUIVALENT) || this.expect(TokenType.OP_LESS_THAN)
                                                     || this.expect(TokenType.OP_LESS_THAN_EQUAL_TO)
                                                     || this.expect(TokenType.OP_GREATER_THAN)
-                                                    || this.expect(TokenType.OP_GREATER_THAN_EQUAL_TO) {
+                                                    || this.expect(TokenType.OP_GREATER_THAN_EQUAL_TO)) {
 
             if (this.accept(TokenType.OP_EQUIVALENT)) {
-                operator = new BooleanEquivalent( );
+                console.log("yes here");
+                rhs = this.booleanExpression();
+                console.log("and here" + rhs);
+                operator = new BoolEquivalent(lhs, rhs);
+                return operator;
             }
             else if (this.expect(TokenType.OP_LESS_THAN)) {
-                operator = new BooleanLessThan( );
+                rhs = this.booleanExpression();
+                operator = new BoolLessThan(lhs, rhs);
             }
             else if (this.expect(TokenType.OP_LESS_THAN_EQUAL_TO)) {
-                operator = new BooleanLessThanEqualTo( );
+                rhs = this.booleanExpression();
+                operator = new BoolLessThanEqualTo(lhs, rhs);
             }
             else if (this.expect(TokenType.OP_GREATER_THAN)) {
-                operator = new BooleanGreaterThan( );
+                rhs = this.booleanExpression();
+                operator = new BoolGreaterThan(lhs, rhs);
             }
             else if (this.expect(TokenType.OP_GREATER_THAN_EQUAL_TO)) {
-                operator = new BooleanGreaterThanEqualTo( );
+                rhs = this.booleanExpression();
+                operator = new BoolGreaterThanEqualTo(lhs, rhs);
             }
 
         }
@@ -526,29 +538,38 @@ function Modulus(lhs, rhs) {
 
 /////////////////
 
-function BooleanExpression(expr) {
+function BoolExpression(expr) {
 
     this.expression = expr; 
 }
 
-function BooleanLessThan(expr) {
+function BoolEquivalent(lhs, rhs) {
 
-    this.boolExpr = expr;
+    this.boolEquivLHS = lhs;
+    this.boolEquivRHS = rhs;
 }
 
-function BooleanLessThanEqualTo(expr) {
-
-    this.boolExpr = expr;
+function BoolLessThan(lhs, rhs) {
+    this.boolExprLHS = lhs;
+    this.boolExprRHS = rhs;
 }
 
-function BooleanGreaterThan(expr) {
+function BoolLessThanEqualTo(lhs, rhs) {
 
-    this.boolExpr = expr;
+    this.boolExprLHS = lhs;
+    this.boolExprRHS = rhs;
 }
 
-function BooleanGreaterThanEqualTo(expr) {
+function BoolGreaterThan(lhs, rhs) {
 
-    this.boolExpr = expr;
+    this.boolExprLHS = lhs;
+    this.boolExprRHS = rhs;
+}
+
+function BoolGreaterThanEqualTo(lhs, rhs) {
+
+    this.boolExprLHS = lhs;
+    this.boolExprRHS = rhs;
 }
 
 /////////////////
@@ -575,7 +596,7 @@ function Assignment(id, expr) {
 function WhileLoop(cond, body) {
 
 	this.condition = cond; // boolExpr
-	this.body = body
+	this.body = body;
 }
 
 ////////////////
@@ -602,7 +623,7 @@ function Block() {
 	this.subBlock = [];
 }
 
-Block.prototype.addBlock(block) {
+Block.prototype.addBlock = function(block) {
 	this.subBlock.push(block);
 }
 
