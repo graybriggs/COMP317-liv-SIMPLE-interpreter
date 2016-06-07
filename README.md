@@ -1,2 +1,34 @@
-# SImplE Interpreter
-A Javascript intepreter for the language SImplE presented in the module COMP317 - Semantics of Programming Languages at the University of Liverpool.
+# Optimizing Compiler
+
+This project is an optimizing compiler for rudimentary programming language. The optimized code that has been generated is verified to be semantically equivalent to its unoptimized equivalent.
+
+# Code Generation
+
+The code generated from this compiler is very conservative x86-64
+
+# Optimized Code Generation
+
+The compiler attepmts the following code optimizations:
+
+The following optimzations occur in the high level intermediate representation
+
+	- Function inlining
+	- Function cloning
+	- Constant folding
+	- Constant propogation
+	- Dead code elimination
+
+The following optimizations occur in the lower intermediate representation
+
+	- Loop invariant code motion
+	- Common sub-expression elimination
+	- Strength reduction
+	- Branch prediction/optimization
+
+The following optimizations occur in assembly code
+
+	- Loop unrolling
+	- Register allocation
+	- Cache optimization
+
+
