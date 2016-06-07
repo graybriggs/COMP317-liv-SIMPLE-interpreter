@@ -200,7 +200,6 @@ Scanner.prototype.extractTokens = function() {
                 console.log("a is: " + a);
                 
                 if (a === "") {
-                    console.log("something is fucked up.");
                     throw "Bad things have happened.";
                 }
                 else if (this.isAssignmentOperator(a)) {
