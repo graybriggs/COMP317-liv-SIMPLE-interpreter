@@ -35,9 +35,9 @@ var TokenType = {
     OP_ASSIGNMENT : 19,
     OP_EQUIVALENT : 20,
     OP_LESS_THAN  : 21,
-    OP_GREATER_THAN : 22,
-    OP_GREATER_THAN_EQUAL_TO : 23,
-    OP_LESS_THAN_EQUAL_TO    : 24,
+    OP_LESS_THAN_EQUAL_TO : 22,
+    OP_GREATER_THAN : 23,
+    OP_GREATER_THAN_EQUAL_TO : 24,
     OP_NOT        : 25,
     SCOPE_START   : 26,
     SCOPE_END     : 27,
@@ -77,11 +77,17 @@ function parser(tokenList) {
     console.log("--- Parsing ---");
     var analyzer = new SyntaxAnalysis(tokenList);
     // start
-    //analyzer.block();
-    var bres = analyzer.booleanExpression();
-    //analyzer.expression();
-    console.log("-- booleanExpression() result: ");
-    console.log(bres);
+    var res = analyzer.block();
+
+    console.log("-- Block result --");
+    console.log(res);
+    
+    /*
+    var expRes = analyzer.expression();
+    console.log("-- expression() result: ");
+    console.log(expRes);
+    */
+
     console.log("-- Analyzer Tokens --");
     console.log(analyzer.tokens);
 }
@@ -152,10 +158,10 @@ SyntaxAnalysis.prototype.factor = function() {
     }
     
     if (this.accept(TokenType.INTEGER)) {
-        return new Integer(parseInt(this.getPreviousToken()));
+        return new ASTInteger(parseInt(this.getPreviousToken()));
     }
     else if (this.accept(TokenType.REAL)) {
-        return new Real(parseFloat(this.getPreviousToken()))
+        return new ASTReal(parseFloat(this.getPreviousToken()))
     }
     else if (this.accept(TokenType.IDENTIFIER)) {
         
@@ -168,9 +174,7 @@ SyntaxAnalysis.prototype.factor = function() {
         var idVal = identMap.getIdentValue(this.getPreviousToken());
         console.log("Idval: " + idVal);
         
-        return new Integer(idVal); 
-        
-        
+        return new ASTInteger(idVal); 
     }
     else if (this.accept(TokenType.L_PAREN)) {
         console.log("L_PAREN");
@@ -204,17 +208,17 @@ SyntaxAnalysis.prototype.term = function() {
                                                         
             if (this.accept(TokenType.MULTIPLICATION)) {
                 var rhs = this.term();
-                operator = new Multiplication(lhs.result(), rhs.result());
+                operator = new ASTMultiplication(lhs, rhs);
             }
             else if (this.accept(TokenType.DIVISION)) {
                 var rhs = this.term();
                 
-                operator = new Division(lhs, rhs);
+                operator = new ASTDivision(lhs, rhs);
             }
             else if (this.accept(TokenType.MODULUS)) {
                 var rhs = this.term();
                 
-                operator = new Modulus(lhs, rhs);
+                operator = new ASTModulus(lhs, rhs);
             }                                                                
         }
         
@@ -242,55 +246,56 @@ SyntaxAnalysis.prototype.expression = function() {
             if (this.accept(TokenType.PLUS)) {
                 var rhs = this.expression();
 
-                operator = new Addition(lhs.result(), rhs.result());
+                operator = new ASTAddition(lhs, rhs);
             }
             else if (this.accept(TokenType.MINUS)) {
                 var rhs = this.expression();
-                operator = new Subtraction(lhs, rhs);
+                operator = new ASTSubtraction(lhs, rhs);
             }
         }
-            
+           
+        while (this.expect(TokenType.OP_EQUIVALENT) || this.expect(TokenType.OP_LESS_THAN)
+                                                    || this.expect(TokenType.OP_LESS_THAN_EQUAL_TO)
+                                                    || this.expect(TokenType.OP_GREATER_THAN)
+                                                    || this.expect(TokenType.OP_GREATER_THAN_EQUAL_TO)) {
+            if (this.accept(TokenType.OP_EQUIVALENT)) {
+                var rhs = this.expression();
+                operator = new ASTBoolOperatorEquivalent(lhs, rhs);
+            }
+            else if (this.accept(TokenType.OP_LESS_THAN)) {
+                var rhs = this.expression();
+                operator = new ASTBoolOperatorLessThan(lhs, rhs);
+            }
+            else if (this.accept(TokenType.OP_LESS_THAN_EQUAL_TO)) {
+                var rhs = this.expression()
+                operator = new ASTBoolOperatorLessThanEqualTo(lhs, rhs);
+            }
+            else if (this.accept(TokenType.OP_GREATER_THAN)) {
+                var rhs = this.expression();
+                operator = new ASTBoolOperatorGreaterThan(lhs, rhs);
+            }
+            else if (this.accept(TokenType.OP_GREATER_THAN_EQUAL_TO)) {
+                var rhs = this.expression();
+                operator = new ASTBoolOperatorGreaterThanEqualTo(lhs, rhs);
+            }
+        }
+
         if (operator === null) {
             console.log(lhs);
-            return lhs;
+            return new ASTExpression(lhs);
         }
         else {
-            console.log("expression result [operator]: " + operator.result());
-            return operator;
+            console.log("expression result [operator]: " + operator);
+            return new ASTExpression(operator);
         }
     }
     else {
-        console.log("expression result [return]: " + lhs.result());
-        return lhs;
+        console.log("expression result [return]: " + lhs);
+        return new ASTExpression(lhs);
     }
 }
 
-SyntaxAnalysis.prototype.variableAssignment = function() {
-    
-    if (this.accept(TokenType.IDENTIFIER)) {
-        console.log("var lhs is: " + this.getPreviousToken());
-        var identTokenName = this.getPreviousToken();
-        
-        if (this.accept(TokenType.OP_ASSIGNMENT)) {
-            var expResult = this.expression();
-            
-            if(!this.accept(TokenType.LINE_TERMINATOR)) {
-                errorRowColumn(this, "Missing terminator at");
-            }
-            console.log("Well formed variable assignment.");
-            identMap.addIdent(identTokenName, expResult.result());
-        }
-        else {
-            errorRowColumn(this, "Expected assignment at");
-        }
-    }
-    else {
-        errorRowColumn(this, "Missing terminator at");
-    }
-
-    return identTokenName;
-}
-
+/*
 SyntaxAnalysis.prototype.booleanExpression = function() {
     
     var lhs = null;
@@ -304,8 +309,11 @@ SyntaxAnalysis.prototype.booleanExpression = function() {
         else if (this.accept(TokenType.KEYWORD_FALSE)) {
             lhs = new BoolExpression(false);
         }
-        else if (this.accept(TokenType.INTEGER) || this.accept(TokenType.IDENTIFIER)) {
-            //lhs = this.expression();
+        else if (this.expect(TokenType.INTEGER) || this.expect(TokenType.IDENTIFIER)) {
+            var bexpr = this.expression();
+            console.log("this expr: ");
+            console.log(bexpr);
+            lhs = new BoolExpression(bexpr);
         }
         else {
             //lhs = this.booleanExpression();
@@ -318,33 +326,70 @@ SyntaxAnalysis.prototype.booleanExpression = function() {
                                                     || this.expect(TokenType.OP_GREATER_THAN_EQUAL_TO)) {
 
             if (this.accept(TokenType.OP_EQUIVALENT)) {
-                console.log("yes here");
                 rhs = this.booleanExpression();
-                console.log("and here" + rhs);
                 operator = new BoolEquivalent(lhs, rhs);
                 return operator;
             }
             else if (this.expect(TokenType.OP_LESS_THAN)) {
                 rhs = this.booleanExpression();
                 operator = new BoolLessThan(lhs, rhs);
+                return operator;
             }
             else if (this.expect(TokenType.OP_LESS_THAN_EQUAL_TO)) {
                 rhs = this.booleanExpression();
                 operator = new BoolLessThanEqualTo(lhs, rhs);
+                return operator;
             }
             else if (this.expect(TokenType.OP_GREATER_THAN)) {
                 rhs = this.booleanExpression();
                 operator = new BoolGreaterThan(lhs, rhs);
+                return operator;
             }
             else if (this.expect(TokenType.OP_GREATER_THAN_EQUAL_TO)) {
                 rhs = this.booleanExpression();
                 operator = new BoolGreaterThanEqualTo(lhs, rhs);
+                return operator;
             }
 
         }
     }
     return lhs;
 }
+
+*/
+
+SyntaxAnalysis.prototype.variableAssignment = function() {
+    
+    var variableAssignment = null;
+
+    if (this.accept(TokenType.IDENTIFIER)) {
+        console.log("var lhs is: " + this.getPreviousToken());
+        var identTokenName = this.getPreviousToken();
+        
+        if (this.accept(TokenType.OP_ASSIGNMENT)) {
+            var expResult = this.expression();
+            
+            if(!this.accept(TokenType.LINE_TERMINATOR)) {
+                errorRowColumn(this, "Missing terminator at");
+            }
+            console.log("Well formed variable assignment.");
+            identMap.addIdent(identTokenName, expResult);
+        }
+        else {
+            errorRowColumn(this, "Expected assignment at");
+        }
+
+        variableAssignment = new ASTAssignment(identTokenName, expResult);
+    }
+    else {
+        errorRowColumn(this, "Missing terminator at");
+    }
+
+    //return identTokenName;
+    return variableAssignment;
+}
+
+
 
 SyntaxAnalysis.prototype.ifStatement = function() {
     
@@ -358,25 +403,33 @@ SyntaxAnalysis.prototype.ifStatement = function() {
      *  }
      */
     
+    var ifStmt = null;
+
     if (this.accept(TokenType.KEYWORD_IF)) {
         this.accept(TokenType.L_PAREN);
         
         //this.booleanExpression();
-        this.expression();
+        var ifCond = this.expression();
         
         this.accept(TokenType.R_PAREN);
         
         this.accept(TokenType.SCOPE_START);
         
-        this.block();
+        var ifBlock = this.block();
         
         this.accept(TokenType.SCOPE_END);
         console.log("ACCEPTED IF STATEMENT");
+        console.log("cond: ");
+        console.log(ifCond);
+        console.log("block: ");
+        console.log(ifBlock);
+        ifStmt = new ASTIfStatement(ifCond, ifBlock);
     }
     
     if (this.expect(TokenType.KEYWORD_ELSE)) {
         this.elseStatement();
     }
+    return ifStmt;
 }
 
 SyntaxAnalysis.prototype.elseStatement = function() {
@@ -418,6 +471,8 @@ SyntaxAnalysis.prototype.skipStatement = function() {
 SyntaxAnalysis.prototype.block = function() {
     
     console.log("In BLOCK");
+
+    var block = new ASTBlock();
     
     while (this.expect(TokenType.IDENTIFIER) || this.expect(TokenType.KEYWORD_IF)
                                              || this.expect(TokenType.KEYWORD_WHILE)
@@ -430,18 +485,18 @@ SyntaxAnalysis.prototype.block = function() {
         if (this.expect(TokenType.IDENTIFIER) && this.tokenLookahead(1).type === TokenType.OP_ASSIGNMENT) {
             console.log("Doing variable assignment");
             var assTokenId = this.variableAssignment();
-            block.addBlock(assTokenId, ident.getIdentValue(assTokenId));
+            block.addBlock(assTokenId, identMap.getIdentValue(assTokenId));
 
         }
         else if (this.expect(TokenType.KEYWORD_IF)) {
             console.log("If statement");
             var ifResult = this.ifStatement();
-            block.addBlock(IfStatement(ifResult));
+            block.addBlock(ASTIfStatement(ifResult));
         }
         else if (this.expect(TokenType.KEYWORD_WHILE)) {
             console.log("while statement");
             var whileResult = this.whileStatement();
-            block.addBlock(WhileLoop(whileResult));
+            block.addBlock(ASTWhileLoop(whileResult));
         }
         // reserved for interpreter only
         /*
@@ -454,7 +509,7 @@ SyntaxAnalysis.prototype.block = function() {
         }
         */
     }
-    
+    return block;
 }
 
 
@@ -468,7 +523,7 @@ SyntaxAnalysis.prototype.block = function() {
 // The fundamental types store the raw values of the data
 // the operations execute the behaviour of those raw values.
 
-function Integer(val) {
+function ASTInteger(val) {
     
     this.value = val;
     
@@ -477,7 +532,7 @@ function Integer(val) {
     }
 }
 
-function Real(val) {
+function ASTReal(val) {
     
     this.value = val;
     
@@ -486,7 +541,7 @@ function Real(val) {
     }
 }
 
-function Addition(lhs, rhs) {
+function ASTAddition(lhs, rhs) {
     
     this.lhs = lhs;
     this.rhs = rhs;
@@ -496,7 +551,7 @@ function Addition(lhs, rhs) {
     }
 }
 
-function Subtraction(lhs, rhs) {
+function ASTSubtraction(lhs, rhs) {
     
     this.lhs = lhs;
     this.rhs = rhs;
@@ -506,7 +561,7 @@ function Subtraction(lhs, rhs) {
     }
 }
 
-function Multiplication(lhs, rhs) {
+function ASTMultiplication(lhs, rhs) {
     
     this.lhs = lhs;
     this.rhs = rhs;
@@ -516,7 +571,7 @@ function Multiplication(lhs, rhs) {
     }
 }
 
-function Division(lhs, rhs) {
+function ASTDivision(lhs, rhs) {
     
     this.lhs = lhs;
     this.rhs = rhs;
@@ -526,7 +581,7 @@ function Division(lhs, rhs) {
     }
 }
 
-function Modulus(lhs, rhs) {
+function ASTModulus(lhs, rhs) {
     
     this.lhs = lhs;
     this.rhs = rhs;
@@ -538,35 +593,35 @@ function Modulus(lhs, rhs) {
 
 /////////////////
 
-function BoolExpression(expr) {
+function ASTExpression(expr) {
 
-    this.expression = expr; 
+    this.expression = expr;
 }
 
-function BoolEquivalent(lhs, rhs) {
+function ASTBoolOperatorEquivalent(lhs, rhs) {
 
     this.boolEquivLHS = lhs;
     this.boolEquivRHS = rhs;
 }
 
-function BoolLessThan(lhs, rhs) {
+function ASTBoolOperatorLessThan(lhs, rhs) {
     this.boolExprLHS = lhs;
     this.boolExprRHS = rhs;
 }
 
-function BoolLessThanEqualTo(lhs, rhs) {
-
-    this.boolExprLHS = lhs;
-    this.boolExprRHS = rhs;
-}
-
-function BoolGreaterThan(lhs, rhs) {
+function ASTBoolOperatorLessThanEqualTo(lhs, rhs) {
 
     this.boolExprLHS = lhs;
     this.boolExprRHS = rhs;
 }
 
-function BoolGreaterThanEqualTo(lhs, rhs) {
+function ASTBoolOperatorGreaterThan(lhs, rhs) {
+
+    this.boolExprLHS = lhs;
+    this.boolExprRHS = rhs;
+}
+
+function ASTBoolOperatorGreaterThanEqualTo(lhs, rhs) {
 
     this.boolExprLHS = lhs;
     this.boolExprRHS = rhs;
@@ -574,7 +629,7 @@ function BoolGreaterThanEqualTo(lhs, rhs) {
 
 /////////////////
 
-function Identifier(name) {
+function ASTIdentifier(name) {
     this.name = name;
     
     this.result = function() {
@@ -584,7 +639,7 @@ function Identifier(name) {
 
 ////////////////
 
-function Assignment(id, expr) {
+function ASTAssignment(id, expr) {
 
 	this.identifier = id;
 	this.expression = expr;
@@ -593,7 +648,7 @@ function Assignment(id, expr) {
 
 ////////////////
 
-function WhileLoop(cond, body) {
+function ASTWhileLoop(cond, body) {
 
 	this.condition = cond; // boolExpr
 	this.body = body;
@@ -601,7 +656,7 @@ function WhileLoop(cond, body) {
 
 ////////////////
 
-function IfStatement(cond, body) {
+function ASTIfStatement(cond, body) {
 
 	this.condition = cond; // boolExpr
 	this.body = body;
@@ -609,7 +664,7 @@ function IfStatement(cond, body) {
 
 ////////////////
 
-function IfElseStatement(cond, body1, body2) {
+function ASTIfElseStatement(cond, body1, body2) {
 
 	this.condition = cond; // boolExpr
 
@@ -619,11 +674,11 @@ function IfElseStatement(cond, body1, body2) {
 
 ///////////////
 
-function Block() {
+function ASTBlock() {
 	this.subBlock = [];
 }
 
-Block.prototype.addBlock = function(block) {
+ASTBlock.prototype.addBlock = function(block) {
 	this.subBlock.push(block);
 }
 
