@@ -1,6 +1,6 @@
 # Optimizing Compiler
 
-This project is an optimizing compiler for rudimentary programming language. The optimized code that has been generated is verified to be semantically equivalent to its unoptimized equivalent.
+This project is an optimizing compiler for a rudimentary programming language. The optimized code that has been generated is verified to be semantically equivalent to its unoptimized equivalent.
 
 # Code Generation
 
