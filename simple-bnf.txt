@@ -10,22 +10,21 @@
 
 <expression> ::= <numeral> | -<expression> | <expression> + <expression>
 		| <expression> - <expression> | <expression> * <expression>
+	    	| <expression> > <expression> | <expression> >= <expression>
+	    	| <expression> < <expression> | <expression> <= <expression>
+	     	| <expression> == <expresion>
+		| !<expression
 		| <method-body> | call <function-name>
 
-<boolean-expression> ::= true | false | <expression>
-		     | <boolean-expression> && <boolean-expression>
-		     | <boolean-expression> || <boolean-expression>
-		     | !<boolean-expression>
-		     | <expression> > <expression> | <expression> >= <expression>
-		     | <expression> < <expression> | <expression> <= <expression>
-		     | <expression> == <expresion>
 
 <program> ::= skip | <variable> := <expression>;
 	      | <program> <program>
-	      | if (<boolean-expression>) { <program> } else { <program> }
-	      | while (<boolean-expression>) { <program> }
+	      | if (<expression>) { <program> } else { <program> }
+	      | while (<expression>) { <program> }
 
 // extended
+
+<expression ::= <expression> && <expression> | <expression> || <expression>
 
 <array-decl> ::= <variable> := [<numeral>]
 <array-access> ::= <variable>[<expression>]
