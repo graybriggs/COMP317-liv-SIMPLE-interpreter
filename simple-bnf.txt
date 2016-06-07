@@ -16,7 +16,8 @@
 		     | <boolean-expression> && <boolean-expression>
 		     | <boolean-expression> || <boolean-expression>
 		     | !<boolean-expression>
-		     | <expression> < <expression>
+		     | <expression> > <expression> | <expression> >= <expression>
+		     | <expression> < <expression> | <expression> <= <expression>
 		     | <expression> == <expresion>
 
 <program> ::= skip | <variable> := <expression>;
