@@ -227,7 +227,7 @@ Scanner.prototype.extractTokens = function() {
                     else if (a === "true")
                         this.tokens.push(new Token(a, TokenType.KEYWORD_TRUE, row, column));
                     else if (a === "false")
-                        this.tokens.push(new Token(a, TokenType.KEYWORD_ELSE, row, column));
+                        this.tokens.push(new Token(a, TokenType.KEYWORD_FALSE, row, column));
                     else if (a === "do")
                         this.tokens.push(new Token(a, TokenType.KEYWORD_ELSE, row, column));
                     else if (a === "skip")
