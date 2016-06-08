@@ -1,6 +1,13 @@
 
-someInt = 10
-someReal = 3.14
+foo := 0
+if (foo < 5) {
+  bar := foo + 1.0 ### Type promotion - bar is of type real
+}
+
+-----------------
+
+someInt := 10
+someReal := 3.14
 
 while (someInt > someReal) {
   someInt := someInt - 1
