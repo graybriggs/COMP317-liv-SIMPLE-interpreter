@@ -4,7 +4,7 @@ This project is an optimizing compiler for a rudimentary programming language. T
 
 # Code Generation
 
-The compiler generates an intermediate representation (IR). It then performs lowering on that IR. The assembly code generated from this compiler is very conservative x86-64.
+The compiler generates an intermediate representation (IR). It then performs lowering on that IR. The unoptimized assembly code generated from this compiler is very conservative x86-64.
 
 # Optimized Code Generation
 
