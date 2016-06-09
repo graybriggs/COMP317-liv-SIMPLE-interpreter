@@ -2,11 +2,15 @@
 // Intermediate Representation Generator
 // Graham Briggs June 2016
 
+'use strict';
 
 function IRGenerator(ast) {
 
 	console.log("--- Generating IR ---");
 	
+	console.log("The AST: ");
+	console.log(ast);
+
 	var ir = new IR();
 	ir.traverse(ast);
 }
@@ -31,34 +35,66 @@ IR.prototype.addition = function(subTree) {
 IR.prototype.assignment = function(subTree) {
 
 	console.log("in assignment");
-	console.log(subTree.identifier);
 
 	var id = this.identifier(subTree);
-	var expr = this.expression(subTree.expression);
+	console.log("LHS id = " + id);
+	var expr = this.expression(subTree.expr); // expr is an array - determine length
+	console.log("Retrived from subtree: ");
+	if (expr.length === 3)
+		console.log(expr[1] + " " + expr[0] + " " + expr[2]);
+	else if (expr.length === 1)
+		console.log(expr[0]);
 }
 
 IR.prototype.identifier = function(subTree) {
 
-	console.log("ID is: " + subTree.identifier);
 	return subTree.identifier;
 }
 
 IR.prototype.expression = function(subTree) {
 
-	console.log("exp");
-	console.log(subTree);
+	console.log("In expression");
 
-	if (subTree.expression instanceof ASTInteger) {
-		console.log("found int: " + subTree.expression.value);
-		return subTree.expression.value;
+	if (subTree instanceof ASTInteger) {
+		console.log("found int: " + subTree.value);
+		return subTree.value;
 	}
-	else if (subTree.expression instanceof ASTAddition) {
-		console.log("add");
-		var lhs = this.expression(subTree.expression.lhs);
-		var rhs = this.expression(subTree.expression.rhs);
+	else if (subTree instanceof ASTAddition || subTree instanceof ASTSubtraction
+		  || subTree instanceof ASTMultiplication || subTree instanceof ASTDivision
+		  || subTree instanceof ASTModulus) {
+
+		console.log("Got: " + subTree.constructor);
+
+		var operands = [];
+
+		switch (subTree.constructor) {
+			case ASTAddition:
+				operands.push("ADD");
+				break;
+			case ASTSubtraction:
+				operands.push("SUB");
+				break;
+			case ASTMultiplication:
+				operands.push("MUL");
+				break;
+			case ASTDivision:
+				operands.push("DIV");
+				break;
+			case ASTModulus:
+				operands.push("MOD");
+				break;
+		}
+
+		var lhs = this.expression(subTree.lhs);
+		var rhs = this.expression(subTree.rhs);
+
+		operands.push(lhs);
+		operands.push(rhs);
+
 		console.log("lhs: " + lhs + " rhs: " + rhs);
+
+		return operands;
 	}
-	return null;
 }
 
 IR.prototype.block = function(subTree) {
