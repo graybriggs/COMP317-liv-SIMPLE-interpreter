@@ -172,7 +172,8 @@ SyntaxAnalysis.prototype.factor = function() {
         
         //var idVal = getIdentValue(this.getPreviousToken());
         var idVal = identMap.getIdentValue(this.getPreviousToken());
-        console.log("Idval: " + idVal);
+        console.log("Idval: ");
+        console.log(idVal);
         
         return new ASTInteger(idVal); 
     }
@@ -380,6 +381,8 @@ SyntaxAnalysis.prototype.variableAssignment = function() {
         }
 
         variableAssignment = new ASTAssignment(identTokenName, expResult);
+        console.log("var assignment: ");
+        console.log(variableAssignment);
     }
     else {
         errorRowColumn(this, "Missing terminator at");
@@ -419,10 +422,6 @@ SyntaxAnalysis.prototype.ifStatement = function() {
         
         this.accept(TokenType.SCOPE_END);
         console.log("ACCEPTED IF STATEMENT");
-        console.log("cond: ");
-        console.log(ifCond);
-        console.log("block: ");
-        console.log(ifBlock);
         ifStmt = new ASTIfStatement(ifCond, ifBlock);
     }
     
@@ -446,19 +445,25 @@ SyntaxAnalysis.prototype.elseStatement = function() {
 
 SyntaxAnalysis.prototype.whileStatement = function() {
     
+    var wLoop = null;
+
     this.accept(TokenType.KEYWORD_WHILE);
     this.accept(TokenType.L_PAREN);
     
     //this.booleanExpression();
-    this.expression();
+    var wCond = this.expression();
     
     this.accept(TokenType.R_PAREN);
     
     this.accept(TokenType.SCOPE_START);
     
-    this.block();
+    var wBlock = this.block();
     
+    wLoop = new ASTWhileLoop(wCond, wBlock);
+
     this.accept(TokenType.SCOPE_END);
+
+    return wLoop;
 }
 
 SyntaxAnalysis.prototype.skipStatement = function() {
@@ -484,19 +489,20 @@ SyntaxAnalysis.prototype.block = function() {
                                                  
         if (this.expect(TokenType.IDENTIFIER) && this.tokenLookahead(1).type === TokenType.OP_ASSIGNMENT) {
             console.log("Doing variable assignment");
-            var assTokenId = this.variableAssignment();
-            block.addBlock(assTokenId, identMap.getIdentValue(assTokenId));
+            var varAssignment = this.variableAssignment();
+            //block.addBlock(assTokenId, identMap.getIdentValue(assTokenId));
+            block.addBlock(varAssignment);
 
         }
         else if (this.expect(TokenType.KEYWORD_IF)) {
             console.log("If statement");
             var ifResult = this.ifStatement();
-            block.addBlock(ASTIfStatement(ifResult));
+            block.addBlock(ifResult);
         }
         else if (this.expect(TokenType.KEYWORD_WHILE)) {
             console.log("while statement");
             var whileResult = this.whileStatement();
-            block.addBlock(ASTWhileLoop(whileResult));
+            block.addBlock(whileResult);
         }
         // reserved for interpreter only
         /*
