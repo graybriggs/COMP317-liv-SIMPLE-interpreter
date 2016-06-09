@@ -50,6 +50,7 @@ var TokenType = {
 
 // Identifier binding
 
+'use strict';
 
 var identMap = (function(){
     var identifiers = {};
@@ -281,16 +282,16 @@ SyntaxAnalysis.prototype.expression = function() {
 
         if (operator === null) {
             console.log(lhs);
-            return new ASTExpression(lhs);
+            return lhs;
         }
         else {
             console.log("expression result [operator]: " + operator);
-            return new ASTExpression(operator);
+            return operator;
         }
     }
     else {
         console.log("expression result [return]: " + lhs);
-        return new ASTExpression(lhs);
+        return lhs;
     }
 }
 
@@ -310,7 +311,7 @@ SyntaxAnalysis.prototype.variableAssignment = function() {
                 errorRowColumn(this, "Missing terminator at");
             }
             console.log("Well formed variable assignment.");
-            identMap.addIdent(identTokenName, expResult);
+            //identMap.addIdent(identTokenName, expResult);
         }
         else {
             errorRowColumn(this, "Expected assignment at");
@@ -468,19 +469,12 @@ SyntaxAnalysis.prototype.block = function() {
 function ASTInteger(val) {
     
     this.value = val;
-    
-    this.result = function() {
-        return this.value;
-    }
+
 }
 
 function ASTReal(val) {
     
     this.value = val;
-    
-    this.result = function() {
-        return this.value;
-    }
 }
 
 function ASTAddition(lhs, rhs) {
@@ -488,29 +482,19 @@ function ASTAddition(lhs, rhs) {
     this.lhs = lhs;
     this.rhs = rhs;
     
-    this.result = function() {
-        return this.lhs + this.rhs;
-    }
 }
 
 function ASTSubtraction(lhs, rhs) {
     
     this.lhs = lhs;
     this.rhs = rhs;
-    
-    this.result = function() {
-        return this.lhs - this.rhs;
-    }
 }
 
 function ASTMultiplication(lhs, rhs) {
     
     this.lhs = lhs;
     this.rhs = rhs;
-    
-    this.result = function() {
-        return this.lhs * this.rhs;
-    }
+
 }
 
 function ASTDivision(lhs, rhs) {
@@ -518,26 +502,19 @@ function ASTDivision(lhs, rhs) {
     this.lhs = lhs;
     this.rhs = rhs;
     
-    this.result = function() {
-        return this.lhs / this.rhs;
-    }
 }
 
 function ASTModulus(lhs, rhs) {
     
     this.lhs = lhs;
     this.rhs = rhs;
-    
-    this.result = function() {
-        return this.lhs % this.rhs;
-    }
 }
 
 /////////////////
 
 function ASTExpression(expr) {
 
-    this.expression = expr;
+    this.expr = expr;
 }
 
 function ASTBoolOperatorEquivalent(lhs, rhs) {
@@ -584,7 +561,7 @@ function ASTIdentifier(name) {
 function ASTAssignment(id, expr) {
 
 	this.identifier = id;
-	this.expression = expr;
+	this.expr = expr;
 }
 
 
