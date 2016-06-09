@@ -24,7 +24,7 @@
 
 // extended
 
-<expression ::= <expression> && <expression> | <expression> || <expression>
+<expression> ::= <expression> && <expression> | <expression> || <expression>
 
 <array-decl> ::= <variable> := [<numeral>]
 <array-access> ::= <variable>[<expression>]
