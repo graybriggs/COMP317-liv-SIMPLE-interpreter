@@ -9,7 +9,7 @@
 // Lexical analysis
 /////////////////////////
 
-
+'use strict';
 
 function lexer(data) {
     
