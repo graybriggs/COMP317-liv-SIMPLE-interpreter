@@ -77,19 +77,17 @@ function parser(tokenList) {
     console.log("--- Parsing ---");
     var analyzer = new SyntaxAnalysis(tokenList);
     // start
-    var res = analyzer.block();
+    var ast = analyzer.block();
 
     console.log("-- Block result --");
-    console.log(res);
+    console.log(ast);
     
     /*
     var expRes = analyzer.expression();
     console.log("-- expression() result: ");
     console.log(expRes);
     */
-
-    console.log("-- Analyzer Tokens --");
-    console.log(analyzer.tokens);
+    return ast;
 }
 
 function SyntaxAnalysis(tokenList) {
@@ -296,68 +294,6 @@ SyntaxAnalysis.prototype.expression = function() {
     }
 }
 
-/*
-SyntaxAnalysis.prototype.booleanExpression = function() {
-    
-    var lhs = null;
-    var operator = null;
-
-    if (!this.expect(TokenType.EOF)) {
-
-        if (this.accept(TokenType.KEYWORD_TRUE)) {
-            lhs = new BoolExpression(true);
-        }
-        else if (this.accept(TokenType.KEYWORD_FALSE)) {
-            lhs = new BoolExpression(false);
-        }
-        else if (this.expect(TokenType.INTEGER) || this.expect(TokenType.IDENTIFIER)) {
-            var bexpr = this.expression();
-            console.log("this expr: ");
-            console.log(bexpr);
-            lhs = new BoolExpression(bexpr);
-        }
-        else {
-            //lhs = this.booleanExpression();
-            lhs = null;
-        }
-        
-        while (this.expect(TokenType.OP_EQUIVALENT) || this.expect(TokenType.OP_LESS_THAN)
-                                                    || this.expect(TokenType.OP_LESS_THAN_EQUAL_TO)
-                                                    || this.expect(TokenType.OP_GREATER_THAN)
-                                                    || this.expect(TokenType.OP_GREATER_THAN_EQUAL_TO)) {
-
-            if (this.accept(TokenType.OP_EQUIVALENT)) {
-                rhs = this.booleanExpression();
-                operator = new BoolEquivalent(lhs, rhs);
-                return operator;
-            }
-            else if (this.expect(TokenType.OP_LESS_THAN)) {
-                rhs = this.booleanExpression();
-                operator = new BoolLessThan(lhs, rhs);
-                return operator;
-            }
-            else if (this.expect(TokenType.OP_LESS_THAN_EQUAL_TO)) {
-                rhs = this.booleanExpression();
-                operator = new BoolLessThanEqualTo(lhs, rhs);
-                return operator;
-            }
-            else if (this.expect(TokenType.OP_GREATER_THAN)) {
-                rhs = this.booleanExpression();
-                operator = new BoolGreaterThan(lhs, rhs);
-                return operator;
-            }
-            else if (this.expect(TokenType.OP_GREATER_THAN_EQUAL_TO)) {
-                rhs = this.booleanExpression();
-                operator = new BoolGreaterThanEqualTo(lhs, rhs);
-                return operator;
-            }
-
-        }
-    }
-    return lhs;
-}
-
-*/
 
 SyntaxAnalysis.prototype.variableAssignment = function() {
     
