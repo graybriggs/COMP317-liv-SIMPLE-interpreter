@@ -1,44 +1,44 @@
 
-foo := 0
+foo := 0;
 if (foo < 5) {
-  bar := foo + 1.0 ### Type promotion - bar is of type real
+  bar := foo + 1.0; ### Type promotion - bar is of type real
 }
 
 -----------------
 
-someInt := 10
-someReal := 3.14
+someInt := 10;
+someReal := 3.14;
 
 while (someInt > someReal) {
-  someInt := someInt - 1
+  someInt := someInt - 1;
 }
 
 ------------------------
 
 function aNumber(skip) {
-  return 5
+  return 5;
 }
 
 function doubleMe(number) {
-  return 2 * number
+  return 2 * number;
 }
 
-num := call aNumber
-result := call doubleMe(num)
+num := call aNumber;
+result := call doubleMe(num);
 
 -------------------------
 
-my_array := [10]
+my_array := [10];
 
-i := 0
+i := 0;
 while (i < 10) {
-  my_array[i] := i
+  my_array[i] := i;
 }
 
-sum := 0
+sum := 0;
 
 while (i < 10) {
-  sum := sum + my_array[i]
+  sum := sum + my_array[i];
 }
 
 ---------
