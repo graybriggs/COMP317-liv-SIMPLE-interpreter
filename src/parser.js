@@ -37,6 +37,7 @@ Compiler.Parser.prototype = {
 
 	startParser: function() {
 		this.ast = this.block(); 
+		//this.ast = this.expression();
 	},
 
 	getAbstractSyntaxTree: function() {
@@ -49,9 +50,6 @@ Compiler.Parser.prototype = {
 		return this.currentToken;
 	},
 
-	getCurrentTokens: function() {
-		return this.getCurrentToken.type;
-	},
 
 	nextSymbol: function() {
 		this.currentSymbolNumber++;
@@ -59,7 +57,7 @@ Compiler.Parser.prototype = {
 	    
 	    this.currentToken = sym;
 	    
-	    console.log("CURRENT SYMBOL: " + this.getCurrentToken().id);      
+	    console.log("CURRENT SYMBOL: " + Tokens.TokenString.getTokenString(this.getCurrentToken().type) + ": " + this.getCurrentToken().id);      
 	},
 
 	accept: function(symType) {
@@ -72,12 +70,13 @@ Compiler.Parser.prototype = {
 	},
 
 	expect: function(symType) {
-	   if (this.getCurrentTokens() === symType) {
-    	    return true;
-	    }
-	    else {
-	        return false;
-	    }
+		console.log("expect: " + Tokens.TokenString.getTokenString(symType) + ", found: " + Tokens.TokenString.getTokenString(this.getCurrentToken().type));
+		if (this.getCurrentToken().type === symType) {
+			return true;
+		}
+		else {
+			return false;
+		}
 	},
 
 	getPreviousToken: function() {
@@ -108,10 +107,12 @@ Compiler.Parser.prototype = {
 	        console.log("ident: " + this.getPreviousToken());
 	        
 	        console.log("IDENT");
-	        console.log(identMap.dbgPrintIdentMap());
+	        //console.log(identMap.dbgPrintIdentMap());
 	        
 	        //var idVal = getIdentValue(this.getPreviousToken());
-	        var idVal = identMap.getIdentValue(this.getPreviousToken());
+	        //var idVal = identMap.getIdentValue(this.getPreviousToken());
+	        
+			var idVal = this.getPreviousToken();
 	        console.log("Idval: ");
 	        console.log(idVal);
 	        
@@ -351,6 +352,9 @@ Compiler.Parser.prototype = {
 		console.log("In BLOCK");
 
 	    var block = new AST.Block();
+
+	    console.log("this here block");
+	    console.log(block);
 	    
 	    while (this.expect(Tokens.Tokentype.IDENTIFIER) || this.expect(Tokens.Tokentype.KEYWORD_IF)
 	                                             || this.expect(Tokens.Tokentype.KEYWORD_WHILE)
@@ -360,6 +364,8 @@ Compiler.Parser.prototype = {
 	                                             || this.expect(Tokens.Tokentype.IDENTIFIER)
 	                                             || this.expect(Tokens.Tokentype.L_PAREN)) {
 	                                                 
+	    	console.log("here?");
+
 	        if (this.expect(Tokens.Tokentype.IDENTIFIER) && this.tokenLookahead(1).type === Tokens.Tokentype.OP_ASSIGNMENT) {
 	            console.log("Doing variable assignment");
 	            var varAssignment = this.variableAssignment();
