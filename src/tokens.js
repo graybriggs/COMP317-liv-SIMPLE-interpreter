@@ -32,4 +32,75 @@ Tokens.Tokentype = {
     SCOPE_END     : 27,
     LINE_TERMINATOR : 28,
     EOF : 29
-}
+};
+
+Tokens.TokenString = {
+
+    getTokenString: function(tokenID) {
+
+        switch(tokenID) {
+
+            case 0:
+                return "Left parenthesis";
+            case 1:
+                return "Right parenthesis";
+            case 2:
+                return "Equals";
+            case 3:
+                return "Plus";
+            case 4:
+                return "Minus";
+            case 5:
+                return "Division";
+            case 6:
+                return "Multiplication";
+            case 7:
+                return "Modulus";
+            case 8:
+                return "Integer";
+            case 9:
+                return "Real";
+            case 10:
+                return "Identifier";
+            case 11:
+                return "If";
+            case 12:
+                return "Else";
+            case 13:
+                return "Then";
+            case 14:
+                return "While";
+            case 15:
+                return "True";
+            case 16:
+                return "False";
+            case 17:
+                return "Do";
+            case 18:
+                return "Skip";
+            case 19:
+                return "Assignment operator";
+            case 20:
+                return "Equivalent operator";
+            case 21:
+                return "Less then operator";
+            case 22:
+                return "Less than equal to operator";
+            case 23:
+                return "Greater than operator";
+            case 24:
+                return "Greater than equal to operator";
+            case 25:
+                return "Not operator"
+            case 26:
+                return "Scope start";
+            case 27:
+                return "Scope end";
+            case 28:
+                return "Line terminator";
+            case 29:
+                return "EOF";
+        }
+    }
+
+};
