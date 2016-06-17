@@ -1,4 +1,4 @@
-// Takes an intermediate representation (IR) and generates x86-64 assumbly code.
+ // Takes an intermediate representation (IR) and generates x86-64 assumbly code.
 // The IR is decoupled from the code generator so that various assembly
 // dilects may be implemented if the developer so desires.
 // Graham Briggs
@@ -7,15 +7,18 @@
 
 'use strict';
 
-function CodeGenerator() {
+Compiler.CodeGenerator = function(ircode) {
 
 
 }
 
-function ASMGenerator() {
 
-}
+ASMGenerator.prototype = {
 
-ASMGenerator.prototype.start = function() {
+	constructor: Compiler.CodeGenerator,
+
+	start: function() {
+
+	},
 
 }
