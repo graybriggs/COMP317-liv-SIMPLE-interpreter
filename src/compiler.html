@@ -15,8 +15,16 @@
         <script src="intermediate.js"> </script>
         <script src="application.js"> </script>
 
-        <textarea rows="25" cols="80" id="user_code"></textarea>
-        <button type="button" onclick="main(document.getElementById('user_code').value)" value="Submit">Submit</button>
+        <div id="container" style="float:center">
+            <div id="code_input" align="left" style="float:left">
+                <textarea rows="25" cols="80" id="user_code"></textarea><br>
+                <button type="button" onclick="main(document.getElementById('user_code').value)" value="Submit">Submit</button>
+            </div>
+
+            <div id="tokens" align="right" style="width:500px; float:left; background-color:lightgrey">
+                <h2><center>Tokens</center><h2>
+            <div>
+        </div>
 
 
     </body>
