@@ -140,7 +140,7 @@ Compiler.Lexer.prototype = {
 	                this.tokens.push({id: a, type: Tokens.Tokentype.OP_EQUIVALENT, row: row, col: column});
 	            }
 	            else if (this.isReal(a)) {
-	                this.tokens.push({is: a, type: Tokens.Tokentype.REAL, row: row, col: column});
+	                this.tokens.push({id: a, type: Tokens.Tokentype.REAL, row: row, col: column});
 	            }
 	            else if (this.isInteger(a)) {
 	                this.tokens.push({id: a, type: Tokens.Tokentype.INTEGER, row: row, col: column});
@@ -328,10 +328,4 @@ Compiler.Lexer.Token = function(args) {
 	this.row = args.row;
 	this.column = args.col;
 
-/*
-	this.id = id;
-	this.type = tt;
-	this.row = row;
-	this.column = col;
-*/
 };
