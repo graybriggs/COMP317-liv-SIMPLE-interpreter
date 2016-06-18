@@ -5,14 +5,13 @@
 
 'use strict';
 
-var sequentialExpression = [];
+//var sequentialExpression = [];
 
 Compiler.IRGenerator = function(ast) {
 
 	console.log("--- Generating IR ---");
-	
-	console.log("The AST: ");
-	console.log(ast);
+
+	this.sequentialExpression = [];
 	
 };
 
@@ -51,7 +50,7 @@ Compiler.IRGenerator.prototype = {
 		console.log(r);
 		*/
 		console.log("sequentialExpression");
-		console.log(sequentialExpression);
+		console.log(this.sequentialExpression);
 
 	},
 
@@ -77,44 +76,44 @@ Compiler.IRGenerator.prototype = {
 			//var operands = [];
 
 			switch (subTree.constructor) {
-				case ASTAddition:
+				case AST.Addition:
 					//operands.push("ADD");
 					var lhs = this.expression(subTree.lhs);
 					//operands.push(lhs);
 					var rhs = this.expression(subTree.rhs);
 					//operands.push(rhs);
 
-					sequentialExpression.push("(ADD " + lhs + " " + rhs + ")");
+					this.sequentialExpression.push("(ADD " + lhs + " " + rhs + ")");
 
 					break;
-				case ASTSubtraction:
+				case AST.Subtraction:
 					//operands.push("SUB");
 					var lhs = this.expression(subTree.lhs);
 					//operands.push(lhs);
 					var rhs = this.expression(subTree.rhs);
 					//operands.push(rhs);
-					sequentialExpression.push("(SUB " + lhs + " " + rhs + ")");
+					this.sequentialExpression.push("(SUB " + lhs + " " + rhs + ")");
 					break;
-				case ASTMultiplication:
+				case AST.Multiplication:
 					//operands.push("MUL");
 					var lhs = this.expression(subTree.lhs);
 					//operands.push(lhs);
 					var rhs = this.expression(subTree.rhs);
 					//operands.push(rhs);
-					sequentialExpression.push("(MUL " + lhs + " " + rhs + ")");
+					this.sequentialExpression.push("(MUL " + lhs + " " + rhs + ")");
 					break;
-				case ASTDivision:
+				case AST.Division:
 					var lhs = this.expression(subTree.lhs);
 					var rhs = this.expression(subTree.rhs);
-					sequentialExpression.push("(DIV " + lhs + " " + rhs + ")");
+					this.sequentialExpression.push("(DIV " + lhs + " " + rhs + ")");
 					break;
-				case ASTModulus:
+				case AST.Modulus:
 					//operands.push("MOD");
 					var lhs = this.expression(subTree.lhs);
 					//operands.push(lhs);
 					var rhs = this.expression(subTree.rhs);
 					//operands.push(rhs);
-					sequentialExpression.push("(MOD " + lhs + " " + rhs + ")");
+					this.sequentialExpression.push("(MOD " + lhs + " " + rhs + ")");
 					break;
 			}
 			//return operands;
