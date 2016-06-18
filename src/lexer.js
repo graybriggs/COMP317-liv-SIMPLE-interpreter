@@ -50,7 +50,7 @@ Compiler.Lexer.prototype = {
 
 	    while (i < this.originalString.length) {
 
-	        console.log(this.originalString.substr(i));
+	        //console.log(this.originalString.substr(i));
 
 	        if (this.originalString[i] === '\n') {
 	            i++;
@@ -61,125 +61,125 @@ Compiler.Lexer.prototype = {
 	    
 	        switch (this.originalString[i]) {
 	        case ' ':
-	            console.log("whitespace");
+	            //console.log("whitespace");
 	            column++;
 	            i++;
 	            break;
 	        case ')':
-	            console.log(")");
-	            this.tokens.push(new Compiler.Lexer.Token(')', Tokens.Tokentype.R_PAREN, row, column));
+	            //console.log(")");
+	            this.tokens.push({id: ')', type: Tokens.Tokentype.R_PAREN, row: row, col: column});
 	            column++;
 	            i++;
 	            break;
 	        case '(':
-	            console.log(")");
-	            this.tokens.push(new Compiler.Lexer.Token('(', Tokens.Tokentype.L_PAREN, row, column));
+				//console.log(")");
+	            this.tokens.push({id: ')', type: Tokens.Tokentype.L_PAREN, row: row, col: column});
 	            column++;
 	            i++;
 	            break;
 	        case '+':
-	            console.log("+");
-	            this.tokens.push(new Compiler.Lexer.Token('+', Tokens.Tokentype.PLUS, row, column));
+		        //console.log("+");
+	            this.tokens.push({id: '+', type: Tokens.Tokentype.PLUS, row: row, col: column});
 	            column++;
 	            i++;
 	            break;
 	        case '-':
-	            console.log("-");
-	            this.tokens.push(new Compiler.Lexer.Token('-', Tokens.Tokentype.MINUS, row, column));                    
+	            //console.log("-");
+	            this.tokens.push({id: '-', type: Tokens.Tokentype.MINUS, row: row, col: column});
 	            column++;
 	            i++;
 	            break;
 	        case '*':
-	            console.log("*");
-	            this.tokens.push(new Compiler.Lexer.Token('*', Tokens.Tokentype.MULTIPLICATION, row, column));
+	            //console.log("*");
+	            this.tokens.push({id: '*', type: Tokens.Tokentype.MULTIPLICATION, row: row, col: column});
 	            column++;
 	            i++;
 	            break;
 	        case '/':
-	            console.log("/");
-	            this.tokens.push(new Compiler.Lexer.Token('/', Tokens.Tokentype.DIVISION, row, column));
+	            //console.log("/");
+	            this.tokens.push({id: '/', type: Tokens.Tokentype.DIVISION, row: row, col: column});
 	            column++;
 	            i++;
 	            break;
 	        case '%':
-	            console.log("%");
-	            this.tokens.push(new Compiler.Lexer.Token('%', Tokens.Tokentype.MODULUS, row, column));
+	            //console.log("%");
+	            this.tokens.push({id: '%', type: Tokens.Tokentype.MODULUS, row: row, col: column});
 	            column++;
 	            i++;
 	            break;
 	        case '{':
-	            console.log("{");
-	            this.tokens.push(new Compiler.Lexer.Token('{', Tokens.Tokentype.SCOPE_START, row, column));
+	            //console.log("{");
+	            this.tokens.push({id: '{', type: Tokens.Tokentype.SCOPE_START, row: row, col: column});
 	            column++;
 	            i++;
 	            break;
 	        case '}':
-	            console.log("}");
-	            this.tokens.push(new Compiler.Lexer.Token('}', Tokens.Tokentype.SCOPE_END, row, column));
+	            //console.log("}");
+	            this.tokens.push({id: '}', type: Tokens.Tokentype.SCOPE_END, row: row, col: column});
 	            column++;
 	            i++;
 	            break;
 	        case ';':
-	            console.log(";");
-	            this.tokens.push(new Compiler.Lexer.Token(';', Tokens.Tokentype.LINE_TERMINATOR, row, column));
+	            //console.log(";");
+	            this.tokens.push({id: ';', type: Tokens.Tokentype.LINE_TERMINATOR, row: row, col: column});
 	            column++;
 	            i++;
 	            break;
 	        default:
-	            console.log("in default");
+	            //console.log("in default");
 	            var a = this.getAtom(this.originalString, i);       
-	            console.log("a is: " + a);
+	            //console.log("a is: " + a);
 	            
 	            if (a === "") {
 	                throw "Bad things have happened.";
 	            }
 	            else if (this.isAssignmentOperator(a)) {
-	                this.tokens.push(new Compiler.Lexer.Token(a, Tokens.Tokentype.OP_ASSIGNMENT, row, column));
+	                this.tokens.push({id: a, type: Tokens.Tokentype.OP_ASSIGNMENT, row: row, col: column});
 	            }
 	            else if (this.isEquivalenceOperator(a)) {
-	                this.tokens.push(new Compiler.Lexer.Token(a, Tokens.Tokentype.OP_EQUIVALENT, row, column));
+	                this.tokens.push({id: a, type: Tokens.Tokentype.OP_EQUIVALENT, row: row, col: column});
 	            }
 	            else if (this.isReal(a)) {
-	                this.tokens.push(new Compiler.Lexer.Token(a, Tokens.Tokentype.REAL, row, column));
+	                this.tokens.push({is: a, type: Tokens.Tokentype.REAL, row: row, col: column});
 	            }
 	            else if (this.isInteger(a)) {
-	                this.tokens.push(new Compiler.Lexer.Token(a, Tokens.Tokentype.INTEGER, row, column));
+	                this.tokens.push({id: a, type: Tokens.Tokentype.INTEGER, row: row, col: column});
 	            }
 	            else if (this.isKeyword(a)) {
 	                if (a === "if")
-	                    this.tokens.push(new Compiler.Lexer.Token(a, Tokens.Tokentype.KEYWORD_IF, row, column));
+	                	this.tokens.push({id: a, type: Tokens.Tokentype.KEYWORD_IF, row: row, col: column});
 	                else if (a === "else")
-	                    this.tokens.push(new Compiler.Lexer.Token(a, Tokens.Tokentype.KEYWORD_ELSE, row, column));
+	                    this.tokens.push({id: a, type: Tokens.Tokentype.KEYWORD_ELSE, row: row, col: column});
 	                else if (a === "then")
-	                    this.tokens.push(new Compiler.Lexer.Token(a, Tokens.Tokentype.KEYWORD_THEN, row, column));
+	                    this.tokens.push({id: a, type: Tokens.Tokentype.KEYWORD_THEN, row: row, col: column});
 	                else if (a === "while")
-	                    this.tokens.push(new Compiler.Lexer.Token(a, Tokens.Tokentype.KEYWORD_WHILE, row, column));
+	                    this.tokens.push({id: a, type: Tokens.Tokentype.KEYWORD_WHILE, row: row, col: column});
 	                else if (a === "true")
-	                    this.tokens.push(new Compiler.Lexer.Token(a, Tokens.Tokentype.KEYWORD_TRUE, row, column));
+	                    this.tokens.push({id: a, type: Tokens.Tokentype.KEYWORD_TRUE, row: row, col: column});
 	                else if (a === "false")
-	                    this.tokens.push(new Compiler.Lexer.Token(a, Tokens.Tokentype.KEYWORD_FALSE, row, column));
+	                    this.tokens.push({id: a, type: Tokens.Tokentype.KEYWORD_FALSE, row: row, col: column});
 	                else if (a === "do")
-	                    this.tokens.push(new Compiler.Lexer.Token(a, Tokens.Tokentype.KEYWORD_ELSE, row, column));
+	                    this.tokens.push({id: a, type: Tokens.Tokentype.KEYWORD_DO, row: row, col: column});
 	                else if (a === "skip")
-	                    this.tokens.push(new Compiler.Lexer.Token(a, Tokens.Tokentype.KEYWORD_SKIP, row, column));
+	                    this.tokens.push({id: a, type: Tokens.Tokentype.KEYWORD_SKIP, row: row, col: column});
 	                else 
 	                    throw "Uhh...";
 	                
 	            }
 	            else if (this.isIdentifier(a)) {
-	                this.tokens.push(new Compiler.Lexer.Token(a, Tokens.Tokentype.IDENTIFIER, row, column));
+	                this.tokens.push({id: a, type: Tokens.Tokentype.IDENTIFIER, row: row, col: column});
 	            }
 	            else if (this.isGreaterThanOperator(a)) {
-	                this.tokens.push(new Compiler.Lexer.Token(a, Tokens.Tokentype.OP_GREATER_THAN, row, column));
+	            	this.tokens.push({id: a, type: Tokens.Tokentype.OP_GREATER_THAN, row: row, col: column});
 	            }
 	            else if (this.isLessThanOperator(a)) {
-	                this.tokens.push(new Compiler.Lexer.Token(a, Tokens.Tokentype.OP_LESS_THAN, row, column));
+	                this.tokens.push({id: a, type: Tokens.Tokentype.OP_LESS_THAN, row: row, col: column});
 	            }   
 	            else if (this.isGreaterThanEqualToOperator(a)) {
-	                this.tokens.push(new Compiler.Lexer.Token(a, Tokens.Tokentype.OP_GREATER_THAN_EQUAL_TO, row, column));
+	                this.tokens.push({id: a, type: Tokens.Tokentype.OP_GREATER_THAN_EQUAL_TO, row: row, col: column});
 	            }
 	            else if (this.isLessThanEqualToOperator(a)) {
-	                this.tokens.push(new Compiler.Lexer.Token(a, Tokens.Tokentype.OP_LESS_THAN_EQUAL_TO, row, column));
+	                this.tokens.push({id: a, type: Tokens.Tokentype.OP_LESS_THAN_EQUAL_TO, row: row, col: column});
 	            }         
 	            else {
 	                throw "Unidentified token: " + column + "," + row;
@@ -188,7 +188,7 @@ Compiler.Lexer.prototype = {
 	            i += a.length;   
 	        }
 	    }
-		this.tokens.push(new Compiler.Lexer.Token("EOF", Tokens.Tokentype.EOF, 0, 0));
+		this.tokens.push({id: "EOF", type: Tokens.Tokentype.EOF, row: row, col: column});
 	 
 	},
 
@@ -320,10 +320,18 @@ Compiler.Lexer.prototype = {
 };
 
 
-Compiler.Lexer.Token = function(id, tt, row, col) {
+//Compiler.Lexer.Token = function(id, tt, row, col) {
+Compiler.Lexer.Token = function(args) {
 
+	this.id = args.id;
+	this.type = args.tt;
+	this.row = args.row;
+	this.column = args.col;
+
+/*
 	this.id = id;
 	this.type = tt;
 	this.row = row;
 	this.column = col;
+*/
 };
