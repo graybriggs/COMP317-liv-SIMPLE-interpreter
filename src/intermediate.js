@@ -40,17 +40,13 @@ Compiler.IRGenerator.prototype = {
 		console.log("LHS id = " + id);
 		var res = this.expression(subTree.expr); // expr is an array - determine length
 		
-		//iterativeTraverse(subTree.expr);
+		
+		console.log("-->" + res);
 
-		//var res = this.exp(subTree.expr);
-		/*
-		console.log("res: " + res);
-		console.log(res);
-		var r = f(res);
-		console.log(r);
-		*/
 		console.log("sequentialExpression");
 		console.log(this.sequentialExpression);
+
+		this.formAssignmentIR(this.sequentialExpression);
 
 	},
 
@@ -77,22 +73,22 @@ Compiler.IRGenerator.prototype = {
 
 			switch (subTree.constructor) {
 				case AST.Addition:
-					//operands.push("ADD");
 					var lhs = this.expression(subTree.lhs);
-					//operands.push(lhs);
 					var rhs = this.expression(subTree.rhs);
-					//operands.push(rhs);
 
-					this.sequentialExpression.push("(ADD " + lhs + " " + rhs + ")");
+					console.log(typeof(lhs));
+					this.sequentialExpression.push("(+ " + lhs + " " + rhs + ")");
+
+
+					//this.sequentialExpression.push("(+ " + lhs + " " + rhs + ")");
 
 					break;
 				case AST.Subtraction:
-					//operands.push("SUB");
 					var lhs = this.expression(subTree.lhs);
-					//operands.push(lhs);
 					var rhs = this.expression(subTree.rhs);
-					//operands.push(rhs);
-					this.sequentialExpression.push("(SUB " + lhs + " " + rhs + ")");
+
+					this.sequentialExpression.push("(- " + lhs + " " + rhs + ")");
+
 					break;
 				case AST.Multiplication:
 					//operands.push("MUL");
@@ -100,12 +96,12 @@ Compiler.IRGenerator.prototype = {
 					//operands.push(lhs);
 					var rhs = this.expression(subTree.rhs);
 					//operands.push(rhs);
-					this.sequentialExpression.push("(MUL " + lhs + " " + rhs + ")");
+					this.sequentialExpression.push("(* " + lhs + " " + rhs + ")");
 					break;
 				case AST.Division:
 					var lhs = this.expression(subTree.lhs);
 					var rhs = this.expression(subTree.rhs);
-					this.sequentialExpression.push("(DIV " + lhs + " " + rhs + ")");
+					this.sequentialExpression.push("(/ " + lhs + " " + rhs + ")");
 					break;
 				case AST.Modulus:
 					//operands.push("MOD");
@@ -113,7 +109,7 @@ Compiler.IRGenerator.prototype = {
 					//operands.push(lhs);
 					var rhs = this.expression(subTree.rhs);
 					//operands.push(rhs);
-					this.sequentialExpression.push("(MOD " + lhs + " " + rhs + ")");
+					this.sequentialExpression.push("(% " + lhs + " " + rhs + ")");
 					break;
 			}
 			//return operands;
@@ -121,50 +117,6 @@ Compiler.IRGenerator.prototype = {
 		}
 	},
 
-/*
-	// in-order interative traversal of expression tree
-	exp: function(subTree) {
-
-		var current = subTree;
-
-		var stack = [];
-		var flatArray = [];
-
-		var done = false;
-
-		console.log("Current:");
-		console.log(current);
-
-		while (!done) {
-
-			if (current !== undefined) {
-				if (current instanceof ASTAddition) {
-					stack.push("ADD");
-				}
-				else if (current instanceof ASTSubtraction) {
-					stack.push("SUB");
-				}
-				else if (current instanceof ASTMultiplication) {
-					stack.push("MUL");
-				}
-			}
-
-			if (current !== undefined) {
-				stack.push(current.value);
-				current = current.lhs;  // lhs
-			}
-			else {
-				if (stack.length !== 0) {
-					flatArray.push(stack.pop());
-					current = current;
-				}
-				else {
-					done = true;
-				}
-			}
-		}
-	}
-*/
 
 	block: function(subTree) {
 
@@ -188,9 +140,138 @@ Compiler.IRGenerator.prototype = {
 				}
 			}.bind(this));
 		}
+	},
+
+	//////////////
+
+	formAssignmentIR: function(exp) {
+
+		var expIR = [];
+		var expNum = 0;
+
+
+		for (var i = 0; i < exp.length; i++) {
+			exp[i] = exp[i].replace("(", "");
+			exp[i] = exp[i].replace(")", "");
+		}
+
+		console.log(exp);
+
+		for (var i = 0; i < exp.length; i++) {
+
+			var toks = exp[i].split(" ");
+
+			console.log(toks);
+			toks = this.removeDeadElements(toks)
+			console.log(toks);
+
+			if (toks.length === 3) {
+
+				switch (toks[0]) {
+				case '+':
+					var irLine = "e" + expNum + " = " + toks[1] + " ADD " + toks[2];
+					expIR.push(irLine);
+					expNum++;
+					break;
+				case '-':
+					var irLine = "e" + expNum + " = " + toks[1] + " SUB " + toks[2];
+					expIR.push(irLine);
+					expNum++;
+					break;
+				case '*':
+					var irLine = "e" + expNum + " = " + toks[1] + " MUL " + toks[2];
+					expIR.push(irLine);
+					expNum++;
+					break;
+				case '/':
+					var irLine = "e" + expNum + " = " + toks[1] + " DIV " + toks[2];
+					expIR.push(irLine);
+					expNum++;
+					break;
+				case '%':
+					var irLine = "e" + expNum + " = " + toks[1] + " MOD " + toks[2];
+					expIR.push(irLine);
+					expNum++;
+					break;
+				}
+			}
+			else if (toks.length === 2) {
+				switch (toks[0]) {
+				case '+':
+					var irLine = "e" + expNum + " = e" + (expNum - 1) + " ADD " + toks[1];
+					expIR.push(irLine);
+					expNum++;
+					break;
+				case '-':
+					var irLine = "e" + expNum + " = " + (expNum - 1) + " SUB " + toks[1];
+					expIR.push(irLine);
+					expNum++;
+					break;
+				case '*':
+					var irLine = "e" + expNum + " = " + (expNum - 1) + " MUL " + toks[1];
+					expIR.push(irLine);
+					expNum++;
+					break;
+				case '/':
+					var irLine = "e" + expNum + " = " + (expNum - 1) + " DIV " + toks[1];
+					expIR.push(irLine);
+					expNum++;
+					break;
+				case '%':
+					var irLine = "e" + expNum + " = " + (expNum - 1) + " MOD " + toks[1];
+					expIR.push(irLine);
+					expNum++;
+					break;
+				}
+			}
+			else if (toks.length === 1) {
+				switch (toks[0]) {
+				case '+':
+					var irLine = "e" + expNum + " = e" + (expNum - 1) + " ADD e" + (expNum - 2);
+					expIR.push(irLine);
+					expNum++;
+					break;
+				case '-':
+					var irLine = "e" + expNum + " = e" + (expNum - 1) + " SUB e" + (expNum - 2);
+					expIR.push(irLine);
+					expNum++;
+					break;
+				case '*':
+					var irLine = "e" + expNum + " = e" + (expNum - 1) + " MUL e" + (expNum - 2);
+					expIR.push(irLine);
+					expNum++;
+					break;
+				case '/':
+					var irLine = "e" + expNum + " = e" + (expNum - 1) + " DIV e" + (expNum - 2);
+					expIR.push(irLine);
+					expNum++;
+					break;
+				case '%':
+					var irLine = "e" + expNum + " = e" + (expNum - 1) + " MOD e" + (expNum - 2);
+					expIR.push(irLine);
+					expNum++;
+					break;
+				}
+			}
+			else {
+				throw "Empty tokens"
+			}
+		}
+
+		console.log(expIR);
+	},
+
+	removeDeadElements(arr) {
+
+		var result = []; 
+
+		for (var i = 0; i < arr.length; i++) {
+			if (arr[i] !== "") {
+				result.push(arr[i]);
+			}
+		}
+		return result;
 	}
-
-
 
 };
 
