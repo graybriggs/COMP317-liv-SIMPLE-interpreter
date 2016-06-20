@@ -12,6 +12,7 @@ Compiler.IRGenerator = function(ast) {
 	console.log("--- Generating IR ---");
 
 	this.sequentialExpression = [];
+	this.finalIR = [];
 	
 };
 
@@ -26,6 +27,10 @@ Compiler.IRGenerator.prototype = {
 		this.block(ast);
 	},
 
+	getFinalIntermediateRepresentation: function() {
+		return this.finalIR;
+	},
+
 	addition: function(subTree) {
 
 		var lhs = this.expression();
@@ -34,20 +39,21 @@ Compiler.IRGenerator.prototype = {
 
 	assignment: function(subTree) {
 
-		console.log("in assignment");
 
 		var id = this.identifier(subTree);
-		console.log("LHS id = " + id);
-		var res = this.expression(subTree.expr); // expr is an array - determine length
-		
-		
-		console.log("-->" + res);
 
-		console.log("sequentialExpression");
+		var lhsId = this.identifier(subTree);
+		var exp = this.expression(subTree.expr);
+
+		console.log("lhs: " + lhsId);
+		
 		console.log(this.sequentialExpression);
 
-		this.formAssignmentIR(this.sequentialExpression);
+		var assignIR  = this.formAssignmentIR(lhsId, this.sequentialExpression);
 
+		console.log(assignIR);
+
+		return assignIR;
 	},
 
 	identifier: function(subTree) {
@@ -75,27 +81,16 @@ Compiler.IRGenerator.prototype = {
 				case AST.Addition:
 					var lhs = this.expression(subTree.lhs);
 					var rhs = this.expression(subTree.rhs);
-
-					console.log(typeof(lhs));
 					this.sequentialExpression.push("(+ " + lhs + " " + rhs + ")");
-
-
-					//this.sequentialExpression.push("(+ " + lhs + " " + rhs + ")");
-
 					break;
 				case AST.Subtraction:
 					var lhs = this.expression(subTree.lhs);
 					var rhs = this.expression(subTree.rhs);
-
 					this.sequentialExpression.push("(- " + lhs + " " + rhs + ")");
-
 					break;
 				case AST.Multiplication:
-					//operands.push("MUL");
 					var lhs = this.expression(subTree.lhs);
-					//operands.push(lhs);
 					var rhs = this.expression(subTree.rhs);
-					//operands.push(rhs);
 					this.sequentialExpression.push("(* " + lhs + " " + rhs + ")");
 					break;
 				case AST.Division:
@@ -104,15 +99,11 @@ Compiler.IRGenerator.prototype = {
 					this.sequentialExpression.push("(/ " + lhs + " " + rhs + ")");
 					break;
 				case AST.Modulus:
-					//operands.push("MOD");
 					var lhs = this.expression(subTree.lhs);
-					//operands.push(lhs);
 					var rhs = this.expression(subTree.rhs);
-					//operands.push(rhs);
 					this.sequentialExpression.push("(% " + lhs + " " + rhs + ")");
 					break;
 			}
-			//return operands;
 			return "";
 		}
 	},
@@ -128,9 +119,7 @@ Compiler.IRGenerator.prototype = {
 
 			subTree.subBlock.forEach(function(sblock) {
 				if (sblock instanceof AST.Assignment) {
-					console.log("got assignment");
-					console.log(sblock);
-					this.assignment(sblock);
+					this.finalIR.push.apply(this.finalIR, this.assignment(sblock));
 				}
 				else if (sblock instanceof AST.WhileLoop) {
 					// todo
@@ -144,17 +133,17 @@ Compiler.IRGenerator.prototype = {
 
 	//////////////
 
-	formAssignmentIR: function(exp) {
+	formAssignmentIR: function(lhs, exp) {
 
-		var expIR = [];
+		var intRep = [];
 		var expNum = 0;
-
 
 		for (var i = 0; i < exp.length; i++) {
 			exp[i] = exp[i].replace("(", "");
 			exp[i] = exp[i].replace(")", "");
 		}
 
+		console.log("HERE");
 		console.log(exp);
 
 		for (var i = 0; i < exp.length; i++) {
@@ -162,7 +151,20 @@ Compiler.IRGenerator.prototype = {
 			var toks = exp[i].split(" ");
 
 			console.log(toks);
-			toks = this.removeDeadElements(toks)
+
+			// helper function
+			var removeDeadElements = function(arr) {
+				var result = []; 
+				for (var i = 0; i < arr.length; i++) {
+					if (arr[i] !== "") {
+						result.push(arr[i]);
+					}
+				}
+				return result;
+			};
+
+			console.log(toks);
+			toks = removeDeadElements(toks);
 			console.log(toks);
 
 			if (toks.length === 3) {
@@ -170,27 +172,27 @@ Compiler.IRGenerator.prototype = {
 				switch (toks[0]) {
 				case '+':
 					var irLine = "e" + expNum + " = " + toks[1] + " ADD " + toks[2];
-					expIR.push(irLine);
+					intRep.push(irLine);
 					expNum++;
 					break;
 				case '-':
 					var irLine = "e" + expNum + " = " + toks[1] + " SUB " + toks[2];
-					expIR.push(irLine);
+					intRep.push(irLine);
 					expNum++;
 					break;
 				case '*':
 					var irLine = "e" + expNum + " = " + toks[1] + " MUL " + toks[2];
-					expIR.push(irLine);
+					intRep.push(irLine);
 					expNum++;
 					break;
 				case '/':
 					var irLine = "e" + expNum + " = " + toks[1] + " DIV " + toks[2];
-					expIR.push(irLine);
+					intRep.push(irLine);
 					expNum++;
 					break;
 				case '%':
 					var irLine = "e" + expNum + " = " + toks[1] + " MOD " + toks[2];
-					expIR.push(irLine);
+					intRep.push(irLine);
 					expNum++;
 					break;
 				}
@@ -199,27 +201,27 @@ Compiler.IRGenerator.prototype = {
 				switch (toks[0]) {
 				case '+':
 					var irLine = "e" + expNum + " = e" + (expNum - 1) + " ADD " + toks[1];
-					expIR.push(irLine);
+					intRep.push(irLine);
 					expNum++;
 					break;
 				case '-':
-					var irLine = "e" + expNum + " = " + (expNum - 1) + " SUB " + toks[1];
-					expIR.push(irLine);
+					var irLine = "e" + expNum + " = e" + (expNum - 1) + " SUB " + toks[1];
+					intRep.push(irLine);
 					expNum++;
 					break;
 				case '*':
-					var irLine = "e" + expNum + " = " + (expNum - 1) + " MUL " + toks[1];
-					expIR.push(irLine);
+					var irLine = "e" + expNum + " = e" + (expNum - 1) + " MUL " + toks[1];
+					intRep.push(irLine);
 					expNum++;
 					break;
 				case '/':
-					var irLine = "e" + expNum + " = " + (expNum - 1) + " DIV " + toks[1];
-					expIR.push(irLine);
+					var irLine = "e" + expNum + " = e" + (expNum - 1) + " DIV " + toks[1];
+					intRep.push(irLine);
 					expNum++;
 					break;
 				case '%':
-					var irLine = "e" + expNum + " = " + (expNum - 1) + " MOD " + toks[1];
-					expIR.push(irLine);
+					var irLine = "e" + expNum + " = e" + (expNum - 1) + " MOD " + toks[1];
+					intRep.push(irLine);
 					expNum++;
 					break;
 				}
@@ -228,27 +230,27 @@ Compiler.IRGenerator.prototype = {
 				switch (toks[0]) {
 				case '+':
 					var irLine = "e" + expNum + " = e" + (expNum - 1) + " ADD e" + (expNum - 2);
-					expIR.push(irLine);
+					intRep.push(irLine);
 					expNum++;
 					break;
 				case '-':
 					var irLine = "e" + expNum + " = e" + (expNum - 1) + " SUB e" + (expNum - 2);
-					expIR.push(irLine);
+					intRep.push(irLine);
 					expNum++;
 					break;
 				case '*':
 					var irLine = "e" + expNum + " = e" + (expNum - 1) + " MUL e" + (expNum - 2);
-					expIR.push(irLine);
+					intRep.push(irLine);
 					expNum++;
 					break;
 				case '/':
 					var irLine = "e" + expNum + " = e" + (expNum - 1) + " DIV e" + (expNum - 2);
-					expIR.push(irLine);
+					intRep.push(irLine);
 					expNum++;
 					break;
 				case '%':
 					var irLine = "e" + expNum + " = e" + (expNum - 1) + " MOD e" + (expNum - 2);
-					expIR.push(irLine);
+					intRep.push(irLine);
 					expNum++;
 					break;
 				}
@@ -258,20 +260,21 @@ Compiler.IRGenerator.prototype = {
 			}
 		}
 
-		console.log(expIR);
+		
+
+		////////
+
+		var assign;
+
+		if (expNum > 0)
+			assign = lhs + " ASSIGN e" + (expNum - 1);
+			
+
+
+		intRep.push(assign);
+
+		return intRep;
 	},
-
-	removeDeadElements(arr) {
-
-		var result = []; 
-
-		for (var i = 0; i < arr.length; i++) {
-			if (arr[i] !== "") {
-				result.push(arr[i]);
-			}
-		}
-		return result;
-	}
 
 };
 
