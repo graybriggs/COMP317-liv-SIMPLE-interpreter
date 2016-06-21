@@ -73,7 +73,7 @@ Compiler.Lexer.prototype = {
 	            break;
 	        case '(':
 				//console.log(")");
-	            this.tokens.push({id: ')', type: Tokens.Tokentype.L_PAREN, row: row, col: column});
+	            this.tokens.push({id: '(', type: Tokens.Tokentype.L_PAREN, row: row, col: column});
 	            column++;
 	            i++;
 	            break;
