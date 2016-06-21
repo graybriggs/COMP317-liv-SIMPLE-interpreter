@@ -11,7 +11,8 @@ Compiler.IRGenerator = function(ast) {
 
 	console.log("--- Generating IR ---");
 
-	this.uniqueLabelId = 0;
+	this.uniqueConditionalLabelId = 0;
+	this.uniqueLoopLabelId = 0;
 	this.sequentialExpression = [];
 	this.finalIR = [];
 
@@ -186,7 +187,7 @@ Compiler.IRGenerator.prototype = {
 					this.assignment(subblock);
 				}
 				else if (subblock instanceof AST.WhileLoop) {
-					// todo
+					this.formWhileStatementIR(subblock);
 				}
 				else if (subblock instanceof AST.IfStatement) {
 					this.formIfStatementIR(subblock);
@@ -213,8 +214,8 @@ Compiler.IRGenerator.prototype = {
 		//
 		// L1
 
-		var tempUniqueLabelId = this.uniqueLabelId;
-		this.uniqueLabelId++;
+		var tempUniqueLabelId = this.uniqueConditionalLabelId;
+		this.uniqueConditionalLabelId++;
 		var irLine;
 
 		var exprRes = this.expression(subTree.condition);
@@ -238,6 +239,44 @@ Compiler.IRGenerator.prototype = {
 
 		irLine = "Label_" + tempUniqueLabelId;
 		this.finalIR.push(irLine);
+	},
+
+	formWhileStatementIR: function(subTree) {
+
+		var tempUniqueLabelId = this.uniqueLoopLabelId;
+		this.uniqueLoopLabelId++;
+		var irLine;
+
+		irLine = "Label_Loop_Test_" + tempUniqueLabelId;
+		this.finalIR.push(irLine);
+		console.log(irLine);
+
+		var exprRes = this.expression(subTree.condition);
+
+		if (exprRes === "e") {
+			irLine = "fjump e" + (this.irExprNum - 1) + " Label_Loop_End_" + tempUniqueLabelId;
+			this.finalIR.push(irLine);
+			console.log(irLine);
+		}
+		else {
+			if (exprRes instanceof AST.Identifier)
+				irLine = "fjump " + exprRes.name + " Label_Loop_End_" + tempUniqueLabelId;
+			else
+				irLine = "fjump " + exprRes + " Label_Loop_End_" + tempUniqueLabelId;
+			
+			this.finalIR.push(irLine);
+			console.log(irLine);
+		}
+
+		this.block(subTree.body);
+
+		irLine = "jump Label_Test_" + tempUniqueLabelId;
+		this.finalIR.push(irLine);
+		console.log(irLine);
+
+		irLine = "Label_Loop_Test_End_" + tempUniqueLabelId;
+		this.finalIR.push(irLine);
+		console.log(irLine);
 	}
 
 };
