@@ -70,7 +70,6 @@ Compiler.Parser.prototype = {
 	},
 
 	expect: function(symType) {
-		console.log("expect: " + Tokens.TokenString.getTokenString(symType) + ", found: " + Tokens.TokenString.getTokenString(this.getCurrentToken().type));
 		if (this.getCurrentToken().type === symType) {
 			return true;
 		}
@@ -116,7 +115,7 @@ Compiler.Parser.prototype = {
 	        console.log("Idval: ");
 	        console.log(idVal);
 	        
-	        return new AST.Integer(idVal); 
+	        return new AST.Identifier(idVal); 
 	    }
 	    else if (this.accept(Tokens.Tokentype.L_PAREN)) {
 	        console.log("L_PAREN");
