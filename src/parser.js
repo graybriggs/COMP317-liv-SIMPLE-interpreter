@@ -36,8 +36,8 @@ Compiler.Parser.prototype = {
 	},
 
 	startParser: function() {
-		this.ast = this.block(); 
-		//this.ast = this.expression();
+		//this.ast = this.globalScope(); 
+		this.ast = this.block();
 	},
 
 	getAbstractSyntaxTree: function() {
@@ -339,6 +339,83 @@ Compiler.Parser.prototype = {
 	    return wLoop;
 	},
 
+	functionCall: function() {
+
+		funcArgs = [];
+
+		this.accept(Tokens.Tokentype.KEYWORD_CALL);
+
+		if (this.expect(Tokens.Tokentype.IDENTIFIER)) {
+			this.accept(Tokens.Tokentype.IDENTIFIER);
+			this.accept(Tokens.Tokentype.LINE_TERMINATOR);
+		}
+		else if (this.expect(Tokens.Tokentype.L_PAREN)) {
+			this.accept(Tokens.Tokentype.L_PAREN);
+
+			while (this.expect(Tokens.Tokentype.INTEGER) || this.expect(Tokens.Tokentype.REAL)
+				  || this.expect(Tokens.Tokentype.IDENTIFIER)) {
+
+				var argRes = this.expression();
+
+				funcArgs.push(argRes);
+
+				if (!this.expect(Tokens.L_PAREN))
+					this.accept(Tokens.Tokentype.COMMA_SEPARATOR);
+				else
+					throw "Expected comma or )";
+			}
+			this.accept(Tokens.Tokentype.LINE_TERMINATOR);
+		}
+		else {
+			throw "Syntax error - expected argument list";
+		}
+
+		//return call obj;
+	},
+
+	functionDeclaration: function() {
+
+		var argList = [];
+		var bodyBlock;
+
+		this.accept(Tokens.Tokentype.KEYWORD_FUNCTION)
+		this.accept(Tokens.Tokentype.IDENTIFIER)
+
+		var ident = this.getPreviousToken();
+
+		this.accept(Tokens.Tokentype.L_PAREN)
+
+		while (this.expect(Tokens.Tokentype.IDENTIFIER)) {
+
+			if (this.expect(Tokens.Tokentype.IDENTIFIER)) {
+				this.accept(Tokens.Tokentype.IDENTIFIER);
+				var arg = this.getPreviousToken();
+
+				argList.push(new AST.Identifier(arg));
+			}
+
+			if (this.expect(Tokens.Tokentype.COMMA_SEPARATOR)) {
+				this.accept(Tokens.Tokentype.COMMA_SEPARATOR);
+			}
+			else if (this.expect(Tokens.Tokentype.L_PAREN)) {
+				this.accept(Tokens.Tokentype.L_PAREN);
+			}
+		}
+		if (this.expect(Tokens.Tokentype.R_PAREN)) {
+			this.accept(Tokens.Tokentype.R_PAREN);
+		}
+		else {
+			throw "Missing ) on function argument list";
+		}
+		this.accept(Tokens.Tokentype.SCOPE_START);
+
+		bodyBlock = this.block();
+
+		this.accept(Tokens.Tokentype.SCOPE_END);
+
+		return new AST.Function(ident, argList, bodyBlock);
+	},
+
 	skipStatement: function() {
 		this.accept(Tokens.Tokentype.KEYWORD_SKIP);
     	
@@ -361,16 +438,17 @@ Compiler.Parser.prototype = {
 	                                             || this.expect(Tokens.Tokentype.INTEGER)
 	                                             || this.expect(Tokens.Tokentype.REAL)
 	                                             || this.expect(Tokens.Tokentype.IDENTIFIER)
-	                                             || this.expect(Tokens.Tokentype.L_PAREN)) {
-	                                                 
-	    	console.log("here?");
+	                                             || this.expect(Tokens.Tokentype.L_PAREN)
+	                                             || this.expect(Tokens.Tokentype.CALL)
+	                                             // this.expect(Tokens.Tokentype.SCOPE_START)
+	                                             // this.expect(Tokens.Tokentype.SCOPE_END)
+	                                             ) {
+	                                                
 
 	        if (this.expect(Tokens.Tokentype.IDENTIFIER) && this.tokenLookahead(1).type === Tokens.Tokentype.OP_ASSIGNMENT) {
 	            console.log("Doing variable assignment");
 	            var varAssignment = this.variableAssignment();
-	            //block.addBlock(assTokenId, identMap.getIdentValue(assTokenId));
 	            block.addBlock(varAssignment);
-
 	        }
 	        else if (this.expect(Tokens.Tokentype.KEYWORD_IF)) {
 	            console.log("If statement");
@@ -378,9 +456,14 @@ Compiler.Parser.prototype = {
 	            block.addBlock(ifResult);
 	        }
 	        else if (this.expect(Tokens.Tokentype.KEYWORD_WHILE)) {
-	            console.log("while statement");
+	        	console.log("while statement");
 	            var whileResult = this.whileStatement();
 	            block.addBlock(whileResult);
+	        }
+	        else if (this.expect(Tokens.Tokentype.KEYWORD_CALL)) {
+	        	console.log("call");
+	        	var fcResult = this.functionCall();
+	        	console.log(fcResult);
 	        }
 	        // reserved for interpreter only
 	        /*
@@ -394,5 +477,52 @@ Compiler.Parser.prototype = {
 	        */
 	    }
 	    return block;
-	}
+	},
+
+	globalScope: function() {
+
+		console.log("Global scope");
+
+		var gScope = new AST.GlobalScope();
+
+	    while (this.expect(Tokens.Tokentype.IDENTIFIER) || this.expect(Tokens.Tokentype.KEYWORD_IF)
+                                         || this.expect(Tokens.Tokentype.KEYWORD_WHILE)
+                                         || this.expect(Tokens.Tokentype.IDENTIFIER)
+                                         || this.expect(Tokens.Tokentype.L_PAREN)
+                                         || this.expect(Tokens.Tokentype.CALL)
+                                         || this.expect(Tokens.Tokentype.SCOPE_START)
+                                         || this.expect(Tokens.Tokentype.SCOPE_END)
+                                         || this.expect(Tokens.Tokentype.KEYWORD_FUNCTION)) {
+
+	    	if (this.expect(Tokens.Tokentype.IDENTIFIER) && this.tokenLookahead(1).type === Tokens.Tokentype.OP_ASSIGNMENT) {
+	            console.log("global variable assignment");
+	            var varAssignment = this.variableAssignment();
+	            gScope.addGlobalVariable(varAssignment);
+	        }
+	        else if (this.expect(Tokens.Tokentype.KEYWORD_IF)) {
+	            console.log("If statement");
+	            var ifResult = this.ifStatement();
+	            gScope.addSubBlock(ifResult);
+	        }
+	        else if (this.expect(Tokens.Tokentype.KEYWORD_WHILE)) {
+	            console.log("while statement");
+	            var whileResult = this.whileStatement();
+	            gScope.addSubBlock(whileResult);
+	        }
+	        else if (this.expect(Tokens.Tokentype.KEYWORD_CALL)) {
+	        	console.log("call");
+	        	var fcResult = this.functionCall();
+	        	console.log(fcResult);
+	        }
+	        else if (this.expect(Tokens.Tokentype.KEYWORD_FUNCTION)) {
+	        	console.log("function declarations");
+
+	        	var func = this.functionDeclaration();
+	        	gScope.addFunctionDeclaration(func);
+	        	console.log(func);
+	        }
+	    }
+	    console.log(gScope);
+	    return gScope;
+	},
 };

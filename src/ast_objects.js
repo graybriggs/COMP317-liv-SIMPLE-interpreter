@@ -138,13 +138,43 @@ AST.IfElseStatement = function(cond, body1, body2) {
 
 ///////////////
 
+AST.Function = function(ident, args, body) {
+
+    this.funcIdentifier = ident; // string
+    this.funcArgs = args; // array
+    this.body = body;     // AST.Block
+
+}
+
+///////////////
+
 AST.Block = function() {
-	this.subBlock = [];
+    this.subBlock = [];
 }
 
 AST.Block.prototype.addBlock = function(block) {
-	this.subBlock.push(block);
+    this.subBlock.push(block);
 }
 
+//////////////
+
+AST.GlobalScope = function() {
+
+    this.functionDeclarations = [];
+    this.blocks = [];
+    this.globalVars = [];
+}
+
+AST.GlobalScope.prototype.addFunctionDeclaration = function(funcDecl) {
+    this.functionDeclarations.push(funcDecl);
+}
+
+AST.GlobalScope.prototype.addSubBlock = function(subBlk) {
+    this.blocks.push(subBlk);
+}
+
+AST.GlobalScope.prototype.addGlobalVariable = function(globalVar) {
+    this.globalVars.push(globalVar);
+}
 
 ///////////////
