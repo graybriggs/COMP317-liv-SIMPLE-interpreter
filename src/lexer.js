@@ -107,6 +107,11 @@ Compiler.Lexer.prototype = {
 	            column++;
 	            i++;
 	            break;
+	        case ',':
+	        	this.tokens.push({id: ',', type: Tokens.Tokentype.COMMA_SEPARATOR, row: row, col: column});
+	        	column++;
+	        	i++;
+	        	break;
 	        case '{':
 	            //console.log("{");
 	            this.tokens.push({id: '{', type: Tokens.Tokentype.SCOPE_START, row: row, col: column});
@@ -162,6 +167,12 @@ Compiler.Lexer.prototype = {
 	                    this.tokens.push({id: a, type: Tokens.Tokentype.KEYWORD_DO, row: row, col: column});
 	                else if (a === "skip")
 	                    this.tokens.push({id: a, type: Tokens.Tokentype.KEYWORD_SKIP, row: row, col: column});
+	                else if (a === "call")
+	                    this.tokens.push({id: a, type: Tokens.Tokentype.KEYWORD_CALL, row: row, col: column});
+	                else if (a === "function")
+	                    this.tokens.push({id: a, type: Tokens.Tokentype.KEYWORD_FUNCTION, row: row, col: column});
+	                else if (a === "function")
+	                	this.tokens.push({id: a, type: Tokens.Tokentype.KEYWORD_RETURN, row: row, col: column});
 	                else 
 	                    throw "Uhh...";
 	                
@@ -255,6 +266,12 @@ Compiler.Lexer.prototype = {
 	        return true;
 	    case "skip":
 	        return true;
+	    case "call":
+	    	return true;
+	   	case "function":
+	   		return true;
+	   	case "return":
+	   		return true;
 	    default:
 	        break;
 	        

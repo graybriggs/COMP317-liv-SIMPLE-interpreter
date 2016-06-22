@@ -31,7 +31,11 @@ Tokens.Tokentype = {
     SCOPE_START   : 26,
     SCOPE_END     : 27,
     LINE_TERMINATOR : 28,
-    EOF : 29
+    KEYWORD_CALL : 29,
+    KEYWORD_FUNCTION : 30,
+    KEYWORD_RETURN : 31,
+    COMMA_SEPARATOR : 32,
+    EOF : 33
 };
 
 Tokens.TokenString = {
@@ -63,19 +67,19 @@ Tokens.TokenString = {
             case 10:
                 return "Identifier";
             case 11:
-                return "If";
+                return "If statement";
             case 12:
-                return "Else";
+                return "Else statement";
             case 13:
-                return "Then";
+                return "Then statement";
             case 14:
-                return "While";
+                return "While statement";
             case 15:
                 return "True";
             case 16:
                 return "False";
             case 17:
-                return "Do";
+                return "Do statement";
             case 18:
                 return "Skip";
             case 19:
@@ -99,6 +103,14 @@ Tokens.TokenString = {
             case 28:
                 return "Line terminator";
             case 29:
+                return "Function call keyword";
+            case 30:
+                return "Function keyword";
+            case 31:
+                return "return keyword"
+            case 32:
+                return "Comma separator";
+            case 33:
                 return "EOF";
         }
     }
