@@ -23,19 +23,20 @@ Tokens.Tokentype = {
     KEYWORD_SKIP  : 18,
     OP_ASSIGNMENT : 19,
     OP_EQUIVALENT : 20,
-    OP_LESS_THAN  : 21,
-    OP_LESS_THAN_EQUAL_TO : 22,
-    OP_GREATER_THAN : 23,
-    OP_GREATER_THAN_EQUAL_TO : 24,
-    OP_NOT        : 25,
-    SCOPE_START   : 26,
-    SCOPE_END     : 27,
-    LINE_TERMINATOR : 28,
-    KEYWORD_CALL : 29,
-    KEYWORD_FUNCTION : 30,
-    KEYWORD_RETURN : 31,
-    COMMA_SEPARATOR : 32,
-    EOF : 33
+    OP_NOT_EQUIVALENT: 21,
+    OP_LESS_THAN  : 22,
+    OP_LESS_THAN_EQUAL_TO : 23,
+    OP_GREATER_THAN : 24,
+    OP_GREATER_THAN_EQUAL_TO : 25,
+    OP_NOT        : 26,
+    SCOPE_START   : 27,
+    SCOPE_END     : 28,
+    LINE_TERMINATOR : 29,
+    KEYWORD_CALL : 23,
+    KEYWORD_FUNCTION : 31,
+    KEYWORD_RETURN : 32,
+    COMMA_SEPARATOR : 33,
+    EOF : 34
 };
 
 Tokens.TokenString = {
@@ -87,30 +88,32 @@ Tokens.TokenString = {
             case 20:
                 return "Equivalent operator";
             case 21:
-                return "Less then operator";
+                return "Not equivalent operator";
             case 22:
-                return "Less than equal to operator";
+                return "Less then operator";
             case 23:
-                return "Greater than operator";
+                return "Less than equal to operator";
             case 24:
-                return "Greater than equal to operator";
+                return "Greater than operator";
             case 25:
-                return "Not operator"
+                return "Greater than equal to operator";
             case 26:
-                return "Scope start";
+                return "Not operator"
             case 27:
-                return "Scope end";
+                return "Scope start";
             case 28:
-                return "Line terminator";
+                return "Scope end";
             case 29:
-                return "Function call keyword";
+                return "Line terminator";
             case 30:
-                return "Function keyword";
+                return "Function call keyword";
             case 31:
-                return "return keyword"
+                return "Function keyword";
             case 32:
-                return "Comma separator";
+                return "return keyword"
             case 33:
+                return "Comma separator";
+            case 34:
                 return "EOF";
         }
     }

@@ -144,6 +144,9 @@ Compiler.Lexer.prototype = {
 	            else if (this.isEquivalenceOperator(a)) {
 	                this.tokens.push({id: a, type: Tokens.Tokentype.OP_EQUIVALENT, row: row, col: column});
 	            }
+	            else if (this.isNotEquivalentOperator(a)) {
+	            	this.tokens.push({id: a, type: Tokens.Tokentype.OP_NOT_EQUIVALENT, row: row, col: column});
+	            }
 	            else if (this.isReal(a)) {
 	                this.tokens.push({id: a, type: Tokens.Tokentype.REAL, row: row, col: column});
 	            }
@@ -180,18 +183,18 @@ Compiler.Lexer.prototype = {
 	            else if (this.isIdentifier(a)) {
 	                this.tokens.push({id: a, type: Tokens.Tokentype.IDENTIFIER, row: row, col: column});
 	            }
-	            else if (this.isGreaterThanOperator(a)) {
-	            	this.tokens.push({id: a, type: Tokens.Tokentype.OP_GREATER_THAN, row: row, col: column});
-	            }
-	            else if (this.isLessThanOperator(a)) {
-	                this.tokens.push({id: a, type: Tokens.Tokentype.OP_LESS_THAN, row: row, col: column});
-	            }   
 	            else if (this.isGreaterThanEqualToOperator(a)) {
 	                this.tokens.push({id: a, type: Tokens.Tokentype.OP_GREATER_THAN_EQUAL_TO, row: row, col: column});
 	            }
 	            else if (this.isLessThanEqualToOperator(a)) {
 	                this.tokens.push({id: a, type: Tokens.Tokentype.OP_LESS_THAN_EQUAL_TO, row: row, col: column});
-	            }         
+	            } 
+	            else if (this.isGreaterThanOperator(a)) {
+	            	this.tokens.push({id: a, type: Tokens.Tokentype.OP_GREATER_THAN, row: row, col: column});
+	            }
+	            else if (this.isLessThanOperator(a)) {
+	                this.tokens.push({id: a, type: Tokens.Tokentype.OP_LESS_THAN, row: row, col: column});
+	            }           
 	            else {
 	                throw "Unidentified token: " + column + "," + row;
 	            }
@@ -306,6 +309,14 @@ Compiler.Lexer.prototype = {
 	    else
 	        return false;
 	},
+
+	isNotEquivalentOperator: function(syntax) {
+		if (syntax[0] === '<' && syntax[1] === '>')
+			return true;
+		else
+			return false;
+	
+	},
 	    
 	isGreaterThanOperator: function(syntax) {
 	    if (syntax[0] === '>')
@@ -326,8 +337,8 @@ Compiler.Lexer.prototype = {
 	        return true;
 	    else
 	        return false;
-	}
-	  ,  
+	},  
+
 	isLessThanEqualToOperator: function(syntax) {
 	    if (syntax[0] === '<' && syntax[1] === '=')
 	        return true;
