@@ -62,33 +62,39 @@ AST.Expression = function(expr) {
     this.expr = expr;
 }
 
-AST.BoolOperatorEquivalent = function(lhs, rhs) {
+AST.BoolOpEquivalent = function(lhs, rhs) {
 
-    this.boolEquivLHS = lhs;
-    this.boolEquivRHS = rhs;
+    this.lhs = lhs;
+    this.rhs = rhs;
 }
 
-AST.BoolOperatorLessThan = function(lhs, rhs) {
-    this.boolExprLHS = lhs;
-    this.boolExprRHS = rhs;
+AST.BoolOpNotEquivalent = function(lhs, rhs) {
+
+    this.lhs = lhs;
+    this.rhs = rhs;
 }
 
-AST.BoolOperatorLessThanEqualTo = function(lhs, rhs) {
-
-    this.boolExprLHS = lhs;
-    this.boolExprRHS = rhs;
+AST.BoolOpLessThan = function(lhs, rhs) {
+    this.lhs = lhs;
+    this.rhs = rhs;
 }
 
- AST.BoolOperatorGreaterThan = function(lhs, rhs) {
+AST.BoolOpLessThanEqualTo = function(lhs, rhs) {
 
-    this.boolExprLHS = lhs;
-    this.boolExprRHS = rhs;
+    this.lhs = lhs;
+    this.rhs = rhs;
 }
 
-AST.BoolOperatorGreaterThanEqualTo = function(lhs, rhs) {
+ AST.BoolOpGreaterThan = function(lhs, rhs) {
 
-    this.boolExprLHS = lhs;
-    this.boolExprRHS = rhs;
+    this.lhs = lhs;
+    this.rhs = rhs;
+}
+
+AST.BoolOpGreaterThanEqualTo = function(lhs, rhs) {
+
+    this.lhs = lhs;
+    this.rhs = rhs;
 }
 
 /////////////////

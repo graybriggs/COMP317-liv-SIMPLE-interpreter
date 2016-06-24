@@ -201,23 +201,27 @@ Compiler.Parser.prototype = {
 	                                                    || this.expect(Tokens.Tokentype.OP_GREATER_THAN_EQUAL_TO)) {
 	            if (this.accept(Tokens.Tokentype.OP_EQUIVALENT)) {
 	                var rhs = this.expression();
-	                operator = new AST.BoolOperatorEquivalent(lhs, rhs);
+	                operator = new AST.BoolOpEquivalent(lhs, rhs);
+	            }
+	            else if (this.accept(Tokens.Tokentype.OP_NOT_EQUIVALENT)) {
+	            	var rhs = this.expression();
+	            	operator = new AST.BoolOpNotEquivalent(lhs, rhs);
 	            }
 	            else if (this.accept(Tokens.Tokentype.OP_LESS_THAN)) {
 	                var rhs = this.expression();
-	                operator = new AST.BoolOperatorLessThan(lhs, rhs);
+	                operator = new AST.BoolOpLessThan(lhs, rhs);
 	            }
 	            else if (this.accept(Tokens.Tokentype.OP_LESS_THAN_EQUAL_TO)) {
 	                var rhs = this.expression()
-	                operator = new AST.BoolOperatorLessThanEqualTo(lhs, rhs);
+	                operator = new AST.BoolOpLessThanEqualTo(lhs, rhs);
 	            }
 	            else if (this.accept(Tokens.Tokentype.OP_GREATER_THAN)) {
 	                var rhs = this.expression();
-	                operator = new AST.BoolOperatorGreaterThan(lhs, rhs);
+	                operator = new AST.BoolOpGreaterThan(lhs, rhs);
 	            }
 	            else if (this.accept(Tokens.Tokentype.OP_GREATER_THAN_EQUAL_TO)) {
 	                var rhs = this.expression();
-	                operator = new AST.BoolOperatorGreaterThanEqualTo(lhs, rhs);
+	                operator = new AST.BoolOpGreaterThanEqualTo(lhs, rhs);
 	            }
 	        }
 
