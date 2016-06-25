@@ -195,10 +195,12 @@ Compiler.Parser.prototype = {
 	            }
 	        }
 	           
-	        while (this.expect(Tokens.Tokentype.OP_EQUIVALENT) || this.expect(Tokens.Tokentype.OP_LESS_THAN)
-	                                                    || this.expect(Tokens.Tokentype.OP_LESS_THAN_EQUAL_TO)
-	                                                    || this.expect(Tokens.Tokentype.OP_GREATER_THAN)
-	                                                    || this.expect(Tokens.Tokentype.OP_GREATER_THAN_EQUAL_TO)) {
+	        while (this.expect(Tokens.Tokentype.OP_EQUIVALENT)
+		        	|| this.expect(Tokens.Tokentype.OP_NOT_EQUIVALENT)
+		        	|| this.expect(Tokens.Tokentype.OP_LESS_THAN)
+					|| this.expect(Tokens.Tokentype.OP_LESS_THAN_EQUAL_TO)
+					|| this.expect(Tokens.Tokentype.OP_GREATER_THAN)
+					|| this.expect(Tokens.Tokentype.OP_GREATER_THAN_EQUAL_TO)) {
 	            if (this.accept(Tokens.Tokentype.OP_EQUIVALENT)) {
 	                var rhs = this.expression();
 	                operator = new AST.BoolOpEquivalent(lhs, rhs);

@@ -81,6 +81,7 @@ Compiler.IRGenerator.prototype = {
 			     subTree instanceof AST.Division ||
 			     subTree instanceof AST.Modulus ||
 			     subTree instanceof AST.BoolOpEquivalent ||
+			     subTree instanceof AST.BoolOpNotEquivalent ||
 			     subTree instanceof AST.BoolOpLessThan ||
 			     subTree instanceof AST.BoolOpLessThanEqualTo ||
 			     subTree instanceof AST.BoolOpGreaterThan ||
@@ -133,7 +134,6 @@ Compiler.IRGenerator.prototype = {
 
 					break;
 				case AST.BoolOpEquvalent:
-					console.log("GOT BOOL OP ==");
 					var lhs = this.expression(subTree.lhs);
 					var rhs = this.expression(subTree.rhs);
 
@@ -141,8 +141,15 @@ Compiler.IRGenerator.prototype = {
 					this.finalIR.push(irRes);
 
 					break;
+				case AST.BoolOpNotEquivalent:
+					var lhs = this.expression(subTree.lhs);
+					var rhs = this.expression(subTree.rhs);
+
+					var irRes = this.produceExprIRHelper(lhs, rhs, "BOOL_NOT_EQ");
+					this.finalIR.push(irRes);
+
+					break;
 				case AST.BoolOpLessThan:
-					console.log("GOT BOOL OP < ");
 					var lhs = this.expression(subTree.lhs);
 					var rhs = this.expression(subTree.rhs);
 
@@ -151,7 +158,6 @@ Compiler.IRGenerator.prototype = {
 
 					break;
 				case AST.BoolOpLessThanEqualTo:
-					console.log("GOT BOOL OP <=");
 					var lhs = this.expression(subTree.lhs);
 					var rhs = this.expression(subTree.rhs);
 
@@ -193,6 +199,7 @@ Compiler.IRGenerator.prototype = {
 		}
 		else if (lhs instanceof AST.Identifier) {
 			if (typeof(rhs) === "number") {
+				console.log("yeap");
 				console.log("t" + this.irExprNum + " = " + lhs.name + " " + binop + " " + rhs);
 				irCode = "t" + this.irExprNum + " = " + lhs.name + " " + binop + " " + rhs;
 			}
