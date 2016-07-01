@@ -302,13 +302,16 @@ Compiler.Parser.prototype = {
 	        
 	        this.accept(Tokens.Tokentype.SCOPE_END);
 	        console.log("ACCEPTED IF STATEMENT");
-	        ifStmt = new AST.IfStatement(ifCond, ifBlock);
-	    }
+
 	    
-	    if (this.expect(Tokens.Tokentype.KEYWORD_ELSE)) {
-	        this.elseStatement();
-	    }
-	    return ifStmt;
+		    if (this.expect(Tokens.Tokentype.KEYWORD_ELSE)) {
+		    	var elseStmt = this.elseStatement();
+		        return new AST.IfElseStatement(ifCond, ifBlock, elseStmt);
+		    }
+		    else {
+		    	return new AST.IfStatement(ifCond, ifStmt);
+		    }
+		}
 	},
 
 	elseStatement: function() {
@@ -317,10 +320,11 @@ Compiler.Parser.prototype = {
     
 	    this.accept(Tokens.Tokentype.SCOPE_START);
 	    
-	    this.block();
+	    var blk = this.block();
 	    
 	    this.accept(Tokens.Tokentype.SCOPE_END);
 	    console.log("ACCEPTED ELSE STATEMENT");
+	    return blk;
 	},
 
 	whileStatement: function() {
