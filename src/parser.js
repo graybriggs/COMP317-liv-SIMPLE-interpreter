@@ -309,7 +309,7 @@ Compiler.Parser.prototype = {
 		        return new AST.IfElseStatement(ifCond, ifBlock, elseStmt);
 		    }
 		    else {
-		    	return new AST.IfStatement(ifCond, ifStmt);
+		    	return new AST.IfStatement(ifCond, ifBlock);
 		    }
 		}
 	},
