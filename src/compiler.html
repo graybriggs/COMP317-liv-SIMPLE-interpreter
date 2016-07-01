@@ -7,17 +7,26 @@
     <body>
 
         <div id="container" style="float:center">
-            <div id="code_input" align="left" style="float:left">
+            <div id="code_input" align="left" style="float:left;font-family:monospace">
                 <textarea rows="25" cols="80" id="user_code"></textarea><br>
                 <button type="button" onclick="main(document.getElementById('user_code').value)" value="Submit">Submit</button>
             </div>
 
-            <div id="tokens" align="right" style="width:500px; float:left; background-color:lightgrey;">
-                <h2><center>Tokens</center><h2>
-            <div>
+            <div id="ir" style="width:500px; height:650px; float:left; background-color:lightgreen; font-family:monospace">
+                <h2><center>Intermediate Representation<center></h2>
+            </div>
 
-            <div id="ir" align="right" style="width:1000px; float:right; background-color:lightgreen;">
-                <h2><center>IR<center></h2>
+            <div id="codegen" style="width:500px; height:650px; float:left; background-color:lightblue;">
+                <h2><center>ASM Code Generation</center></h2>
+            </div>
+            <div id="optimized_codegen" style="width:500px; height:650px; float:left; background-color:#ffff99;">
+                <h2><center>Optimized ASM Code Generation</center></h2>
+            </div>
+            <div id="optimzations_achieved" style="width: 250px; height: 650px; float:left; background-color:#9370DB;">
+                <h2><center>Optimizations Achieved</center></h2>
+            </div>
+            <div id="tokens" style="width:500px; height:650px; float:left; background-color:lightgray;font-family:monospace">
+                <h2><center>Tokens</center><h2>
             </div>
         </div>
 
