@@ -246,10 +246,7 @@ Compiler.IRGenerator.prototype = {
 				else if (subblock instanceof AST.WhileLoop) {
 					this.formWhileStatementIR(subblock);
 				}
-				else if (subblock instanceof AST.IfStatement) {
-					this.formIfStatementIR(subblock);
-				}
-				else if (subblock instanceof AST.IfElseStatement) {
+				else if (subblock instanceof AST.IfStatement || subblock instanceof AST.IfElseStatement) {
 					this.formIfElseStatementIR(subblock);
 				}
 			}.bind(this));
@@ -297,10 +294,10 @@ Compiler.IRGenerator.prototype = {
 
 		this.block(subTree.bodyIf);
 
-		irLine = "Label_" + tempUniqueLabelId + ":";
-		this.finalIR.push(irLine);
-
 		if (subTree instanceof AST.IfElseStatement) {
+			irLine = "Label_Else" + tempUniqueLabelId + ":";
+			this.finalIR.push(irLine);
+
 			this.block(subTree.bodyElse);
 		}
 
