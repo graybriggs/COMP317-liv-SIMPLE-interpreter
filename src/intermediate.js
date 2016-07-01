@@ -249,6 +249,9 @@ Compiler.IRGenerator.prototype = {
 				else if (subblock instanceof AST.IfStatement) {
 					this.formIfStatementIR(subblock);
 				}
+				else if (subblock instanceof AST.IfElseStatement) {
+					this.formIfElseStatementIR(subblock);
+				}
 			}.bind(this));
 		}
 	},
@@ -256,8 +259,7 @@ Compiler.IRGenerator.prototype = {
 	////////////////
 	////////////////
 
-
-	formIfStatementIR: function(subTree) {
+	formIfElseStatementIR: function(subTree) {
 
 		// if (true) {
 		//    // foo
@@ -266,10 +268,11 @@ Compiler.IRGenerator.prototype = {
 		//---------------
 		//
 		// e1 = expr
-		// fjump L1
-		// 
-		//
-		// L1
+		// fjump el L1
+		// {if instructions}
+		// LabelElse1:
+		// {else instructions}
+
 
 		var tempUniqueLabelId = this.uniqueConditionalLabelId;
 		this.uniqueConditionalLabelId++;
@@ -292,10 +295,15 @@ Compiler.IRGenerator.prototype = {
 			console.log(irLine);
 		}
 
-		this.block(subTree.body);
+		this.block(subTree.bodyIf);
 
-		irLine = "Label_" + tempUniqueLabelId;
+		irLine = "Label_" + tempUniqueLabelId + ":";
 		this.finalIR.push(irLine);
+
+		if (subTree instanceof AST.IfElseStatement) {
+			this.block(subTree.bodyElse);
+		}
+
 	},
 
 	formWhileStatementIR: function(subTree) {
@@ -304,14 +312,14 @@ Compiler.IRGenerator.prototype = {
 		this.uniqueLoopLabelId++;
 		var irLine;
 
-		irLine = "Label_Loop_Test_" + tempUniqueLabelId;
+		irLine = "Label_Loop_Test_" + tempUniqueLabelId + ":";
 		this.finalIR.push(irLine);
 		console.log(irLine);
 
 		var exprRes = this.expression(subTree.condition);
 
 		if (exprRes === "t") {
-			irLine = "fjump e" + (this.irExprNum - 1) + " Label_Loop_End_" + tempUniqueLabelId;
+			irLine = "fjump t" + (this.irExprNum - 1) + " Label_Loop_End_" + tempUniqueLabelId;
 			this.finalIR.push(irLine);
 			console.log(irLine);
 		}
@@ -331,7 +339,7 @@ Compiler.IRGenerator.prototype = {
 		this.finalIR.push(irLine);
 		console.log(irLine);
 
-		irLine = "Label_Loop_Test_End_" + tempUniqueLabelId;
+		irLine = "Label_Loop_Test_End_" + tempUniqueLabelId + ":";
 		this.finalIR.push(irLine);
 		console.log(irLine);
 	}
