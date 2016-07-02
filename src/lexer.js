@@ -136,7 +136,7 @@ Compiler.Lexer.prototype = {
 	            //console.log("a is: " + a);
 	            
 	            if (a === "") {
-	                throw "Bad things have happened.";
+	                throw "Unrecognized token at: " + column + "," + row;
 	            }
 	            else if (this.isAssignmentOperator(a)) {
 	                this.tokens.push({id: a, type: Tokens.Tokentype.OP_ASSIGNMENT, row: row, col: column});
