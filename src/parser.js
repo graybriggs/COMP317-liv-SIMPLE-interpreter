@@ -117,7 +117,7 @@ Compiler.Parser.prototype = {
 	    }
 	    else if (this.accept(Tokens.Tokentype.L_PAREN)) {
 
-	        var exp = this.expression();
+	        var exp = this.parseExpression();
 	        this.accept(Tokens.Tokentype.R_PAREN);
 	        return exp;
 	    }
@@ -205,7 +205,7 @@ Compiler.Parser.prototype = {
 	// In this language logical binary operators result in expressions.
 	// These logical operators have the lowest precedence of all operators thus
 	// they are placed highest in the generated AST.
-	
+
 	logicalOperator: function() {
 
 		var lhs = this.expression();
@@ -313,7 +313,7 @@ Compiler.Parser.prototype = {
 	        this.accept(Tokens.Tokentype.L_PAREN);
 	        
 	        //this.booleanExpression();
-	        var ifCond = this.expression();
+	        var ifCond = this.parseExpression();
 	        
 	        this.accept(Tokens.Tokentype.R_PAREN);
 	        
@@ -354,7 +354,7 @@ Compiler.Parser.prototype = {
 	    this.accept(Tokens.Tokentype.KEYWORD_WHILE);
 	    this.accept(Tokens.Tokentype.L_PAREN);
 	    
-	    var wCond = this.expression();
+	    var wCond = this.parseExpression();
 	    
 	    this.accept(Tokens.Tokentype.R_PAREN);
 	    
@@ -385,7 +385,7 @@ Compiler.Parser.prototype = {
 			while (this.expect(Tokens.Tokentype.INTEGER) || this.expect(Tokens.Tokentype.REAL)
 				  || this.expect(Tokens.Tokentype.IDENTIFIER)) {
 
-				var argRes = this.expression();
+				var argRes = this.parseExpression();
 
 				funcArgs.push(argRes);
 
@@ -501,7 +501,7 @@ Compiler.Parser.prototype = {
 	            this.accept(Tokens.Tokentype.KEYWORD_SKIP);
 	        }
 	        else {
-	            var res = this.expression();
+	            var res = this.parseExpression();
 	            console.log(res);
 	        }
 	        */
