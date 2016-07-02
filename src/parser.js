@@ -104,9 +104,7 @@ Compiler.Parser.prototype = {
 	    else if (this.accept(Tokens.Tokentype.IDENTIFIER)) {
 	        
 	        console.log("ident: " + this.getPreviousToken());
-	        
-	        console.log("IDENT");
-	        //console.log(identMap.dbgPrintIdentMap());
+			//console.log(identMap.dbgPrintIdentMap());
 	        
 	        //var idVal = getIdentValue(this.getPreviousToken());
 	        //var idVal = identMap.getIdentValue(this.getPreviousToken());
@@ -118,16 +116,12 @@ Compiler.Parser.prototype = {
 	        return new AST.Identifier(idVal); 
 	    }
 	    else if (this.accept(Tokens.Tokentype.L_PAREN)) {
-	        console.log("L_PAREN");
-	        
+
 	        var exp = this.expression();
-	        
 	        this.accept(Tokens.Tokentype.R_PAREN);
-	        console.log("R_PAREN");
 	        return exp;
 	    }
 	    else if (this.accept(Tokens.Tokentype.EOF)) {
-	        //throw "Reached EOF";
 	        console.log("Reached EOF");
 	        return;
 	    }
@@ -135,6 +129,8 @@ Compiler.Parser.prototype = {
 	        throw "Impossible...";
 	    }
 	},
+
+
 
 	term: function() {
 
@@ -182,11 +178,10 @@ Compiler.Parser.prototype = {
 	    
 	    if (!this.expect(Tokens.Tokentype.EOF)) {
 	        
-	        while (this.expect(Tokens.Tokentype.PLUS) || this.expect(Tokens.Tokentype.MINUS)) {
+	        while (this.expect(Tokens.Tokentype.PLUS) || this.expect(Tokens.Tokentype.MINUS)){
 	            
 	            if (this.accept(Tokens.Tokentype.PLUS)) {
 	                var rhs = this.expression();
-
 	                operator = new AST.Addition(lhs, rhs);
 	            }
 	            else if (this.accept(Tokens.Tokentype.MINUS)) {
@@ -194,53 +189,79 @@ Compiler.Parser.prototype = {
 	                operator = new AST.Subtraction(lhs, rhs);
 	            }
 	        }
-	           
-	        while (this.expect(Tokens.Tokentype.OP_EQUIVALENT)
+
+	        if (operator === null) {
+	            return lhs;
+	        }
+	        else {
+	            return operator;
+	        }
+	    }
+	    else {
+	        return lhs;
+	    }
+	},
+
+	// In this language logical binary operators result in expressions.
+	// These logical operators have the lowest precedence of all operators thus
+	// they are placed highest in the generated AST.
+	
+	logicalOperator: function() {
+
+		var lhs = this.expression();
+		var operator = null;
+
+		if (!this.expect(Tokens.Tokentype.EOF)) {
+
+			while (this.expect(Tokens.Tokentype.OP_EQUIVALENT)
 		        	|| this.expect(Tokens.Tokentype.OP_NOT_EQUIVALENT)
 		        	|| this.expect(Tokens.Tokentype.OP_LESS_THAN)
 					|| this.expect(Tokens.Tokentype.OP_LESS_THAN_EQUAL_TO)
 					|| this.expect(Tokens.Tokentype.OP_GREATER_THAN)
 					|| this.expect(Tokens.Tokentype.OP_GREATER_THAN_EQUAL_TO)) {
-	            if (this.accept(Tokens.Tokentype.OP_EQUIVALENT)) {
-	                var rhs = this.expression();
+
+				if (this.accept(Tokens.Tokentype.OP_EQUIVALENT)) {
+	                var rhs = this.logicalOperator();
 	                operator = new AST.BoolOpEquivalent(lhs, rhs);
 	            }
 	            else if (this.accept(Tokens.Tokentype.OP_NOT_EQUIVALENT)) {
-	            	var rhs = this.expression();
+	            	var rhs = this.logicalOperator();
 	            	operator = new AST.BoolOpNotEquivalent(lhs, rhs);
 	            }
 	            else if (this.accept(Tokens.Tokentype.OP_LESS_THAN)) {
-	                var rhs = this.expression();
+	                var rhs = this.logicalOperator();
 	                operator = new AST.BoolOpLessThan(lhs, rhs);
 	            }
 	            else if (this.accept(Tokens.Tokentype.OP_LESS_THAN_EQUAL_TO)) {
-	                var rhs = this.expression()
+	                var rhs = this.logicalOperator();
 	                operator = new AST.BoolOpLessThanEqualTo(lhs, rhs);
 	            }
 	            else if (this.accept(Tokens.Tokentype.OP_GREATER_THAN)) {
-	                var rhs = this.expression();
+	                var rhs = this.logicalOperator();
 	                operator = new AST.BoolOpGreaterThan(lhs, rhs);
 	            }
 	            else if (this.accept(Tokens.Tokentype.OP_GREATER_THAN_EQUAL_TO)) {
-	                var rhs = this.expression();
+	                var rhs = this.logicalOperator();
 	                operator = new AST.BoolOpGreaterThanEqualTo(lhs, rhs);
 	            }
-	        }
+			}
 
-	        if (operator === null) {
-	            console.log("Returning expr lhs: ");
-	            console.log(lhs);
-	            return lhs;
-	        }
-	        else {
-	            console.log("expression result [operator]: " + operator);
-	            return operator;
-	        }
-	    }
-	    else {
-	        console.log("expression result [return]: " + lhs);
-	        return lhs;
-	    }
+			if (operator == null) {
+				return lhs;
+			}
+			else {
+				return operator;
+			}
+
+		}
+		else {
+			return lhs;
+		}
+
+	},
+
+	parseExpression: function() {
+		return this.logicalOperator();
 	},
 
 	variableAssignment: function() {
@@ -251,7 +272,7 @@ Compiler.Parser.prototype = {
 	        var identTokenName = this.getPreviousToken();
 	        
 	        if (this.accept(Tokens.Tokentype.OP_ASSIGNMENT)) {
-	            var expResult = this.expression();
+	            var expResult = this.parseExpression();
 	            
 	            if(!this.accept(Tokens.Tokentype.LINE_TERMINATOR)) {
 	                errorRowColumn(this, "Missing terminator at");
@@ -333,7 +354,6 @@ Compiler.Parser.prototype = {
 	    this.accept(Tokens.Tokentype.KEYWORD_WHILE);
 	    this.accept(Tokens.Tokentype.L_PAREN);
 	    
-	    //this.booleanExpression();
 	    var wCond = this.expression();
 	    
 	    this.accept(Tokens.Tokentype.R_PAREN);
