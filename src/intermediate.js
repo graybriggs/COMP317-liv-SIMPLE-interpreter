@@ -7,7 +7,7 @@
 
 //var sequentialExpression = [];
 
-Compiler.IRGenerator = function(ast) {
+Compiler.IRGenerator = function() {
 
 	console.log("--- Generating IR ---");
 
@@ -93,7 +93,7 @@ Compiler.IRGenerator.prototype = {
 					var lhs = this.expression(subTree.lhs);
 					var rhs = this.expression(subTree.rhs);
 
-					var irRes = this.produceExprIRHelper(lhs, rhs, "ADD");
+					var irRes = this.produceExpressionIR(lhs, rhs, "ADD");
 					this.finalIR.push(irRes);
 
 					break;
@@ -102,7 +102,7 @@ Compiler.IRGenerator.prototype = {
 					var lhs = this.expression(subTree.lhs);
 					var rhs = this.expression(subTree.rhs);
 
-					var irRes = this.produceExprIRHelper(lhs, rhs, "SUB");
+					var irRes = this.produceExpressionIR(lhs, rhs, "SUB");
 					this.finalIR.push(irRes);
 
 					break;
@@ -111,7 +111,7 @@ Compiler.IRGenerator.prototype = {
 					var lhs = this.expression(subTree.lhs);
 					var rhs = this.expression(subTree.rhs);
 
-					var irRes = this.produceExprIRHelper(lhs, rhs, "MUL");
+					var irRes = this.produceExpressionIR(lhs, rhs, "MUL");
 					this.finalIR.push(irRes);
 
 					break;
@@ -120,7 +120,7 @@ Compiler.IRGenerator.prototype = {
 					var lhs = this.expression(subTree.lhs);
 					var rhs = this.expression(subTree.rhs);
 
-					var irRes = this.produceExprIRHelper(lhs, rhs, "DIV");
+					var irRes = this.produceExpressionIR(lhs, rhs, "DIV");
 					this.finalIR.push(irRes);
 
 					break;
@@ -128,16 +128,15 @@ Compiler.IRGenerator.prototype = {
 
 					var lhs = this.expression(subTree.lhs);
 					var rhs = this.expression(subTree.rhs);
-
-					var irRes = this.produceExprIRHelper(lhs, rhs, "MOD");
+					var irRes = this.produceExpressionIR(lhs, rhs, "MOD");
 					this.finalIR.push(irRes);
 
 					break;
-				case AST.BoolOpEquvalent:
+				case AST.BoolOpEquivalent:
 					var lhs = this.expression(subTree.lhs);
 					var rhs = this.expression(subTree.rhs);
 
-					var irRes = this.produceExprIRHelper(lhs, rhs, "Bool_EQ");
+					var irRes = this.produceExpressionIR(lhs, rhs, "Bool_EQ");
 					this.finalIR.push(irRes);
 
 					break;
@@ -145,7 +144,7 @@ Compiler.IRGenerator.prototype = {
 					var lhs = this.expression(subTree.lhs);
 					var rhs = this.expression(subTree.rhs);
 
-					var irRes = this.produceExprIRHelper(lhs, rhs, "BOOL_NOT_EQ");
+					var irRes = this.produceExpressionIR(lhs, rhs, "BOOL_NOT_EQ");
 					this.finalIR.push(irRes);
 
 					break;
@@ -153,7 +152,7 @@ Compiler.IRGenerator.prototype = {
 					var lhs = this.expression(subTree.lhs);
 					var rhs = this.expression(subTree.rhs);
 
-					var irRes = this.produceExprIRHelper(lhs, rhs, "Bool_LT");
+					var irRes = this.produceExpressionIR(lhs, rhs, "Bool_LT");
 					this.finalIR.push(irRes);
 
 					break;
@@ -161,7 +160,7 @@ Compiler.IRGenerator.prototype = {
 					var lhs = this.expression(subTree.lhs);
 					var rhs = this.expression(subTree.rhs);
 
-					var irRes = this.produceExprIRHelper(lhs, rhs, "Bool_LTET");
+					var irRes = this.produceExpressionIR(lhs, rhs, "Bool_LTET");
 					this.finalIR.push(irRes);
 
 					break;
@@ -169,7 +168,7 @@ Compiler.IRGenerator.prototype = {
 					var lhs = this.expression(subTree.lhs);
 					var rhs = this.expression(subTree.rhs);
 
-					var irRes = this.produceExprIRHelper(lhs, rhs, "Bool_GT");
+					var irRes = this.produceExpressionIR(lhs, rhs, "Bool_GT");
 					this.finalIR.push(irRes);
 
 					break;
@@ -177,60 +176,55 @@ Compiler.IRGenerator.prototype = {
 					var lhs = this.expression(subTree.lhs);
 					var rhs = this.expression(subTree.rhs);
 
-					var irRes = this.produceExprIRHelper(lhs, rhs, "Bool_GTET");
+					var irRes = this.produceExpressionIR(lhs, rhs, "Bool_GTET");
 					this.finalIR.push(irRes);
 
 					break;
+				
 			}
 			return "t";
 		}
 		return this.exprNum;
 	},
 
-	// helper for expression, avoiding code bloat
-	produceExprIRHelper: function(lhs, rhs, binop) {
+	produceExpressionIR: function(lhs, rhs, binop) {
 
-		var irCode;
-
-// found identifiers
-		if (lhs instanceof AST.Identifier && rhs instanceof AST.Identifier) {
-			console.log("t" + this.irExprNum + " = " + lhs.name + " " + binop + " " + rhs.name);
-			irCode = "t" + this.irExprNum + " = " + lhs.name + " " + binop + " " + rhs.name;
-		}
-		else if (lhs instanceof AST.Identifier) {
-			if (typeof(rhs) === "number") {
-				console.log("yeap");
-				console.log("t" + this.irExprNum + " = " + lhs.name + " " + binop + " " + rhs);
-				irCode = "t" + this.irExprNum + " = " + lhs.name + " " + binop + " " + rhs;
-			}
-			else if (typeof(rhs) === "string") {
-				console.log("t" + this.irExprNum + " = " + lhs.name + " " + binop + " t" + (this.irExprNum - 1));
-				irCode = "t" + this.irExprNum + " = " + lhs.name + " " + binop + " t" + (this.irExprNum - 1);
-			}
-		}
-		else if (rhs instanceof AST.Identifier) {
-			if (typeof(lhs) === "number") {
-				console.log("t" + this.irExprNum + " = " + lhs + " " + binop + " " + rhs.name);
-				irCode = "t" + this.irExprNum + " = " + lhs + " " + binop + " " + rhs.name;
-			}
-			else if (typeof(lhs) === "string") {
-				console.log("t" + this.irExprNum + " = " + lhs + " " + binop + " t" + (this.irExprNum - 1));
-				irCode = "t" + this.irExprNum + " = " + lhs + " " + binop + " t" + (this.irExprNum - 1);
-			}
+		// if an identifier is found then get its name
+		var lhsRes;
+		if (lhs instanceof AST.Identifier) {
+			lhsRes = lhs.name;
 		}
 		else {
-			if (typeof(lhs) === "number" && typeof(rhs) === "number") {
-				console.log("t" + this.irExprNum + " = " + lhs + " " + binop + " " + rhs);
-				irCode = "t" + this.irExprNum + " = " + lhs + " " + binop + " " + rhs;
-			}
-			else if (typeof(lhs) === "number" && typeof(rhs) === "string") {
-				console.log("t" + this.irExprNum + " = " + lhs + " " + binop + " " + "t" + (this.irExprNum - 1));
-				irCode = "t" + this.irExprNum + " = " + lhs + " " + binop + " " + "t" + (this.irExprNum - 1);
-			}
+			lhsRes = lhs;
 		}
+		var rhsRes;
+		if (rhs instanceof AST.Identifier) {
+			rhsRes = rhs.name;
+		}
+		else {
+			rhsRes = rhs;
+		}
+
+		// handle compound expressions by breaking them into triples and keep track using temporary variables.
+
+		var formedIR;
+		if (lhs === "t" && rhs === "t") {
+			formedIR = "t" + this.irExprNum + " = " + lhsRes + (this.irExprNum - 1) + " " + binop + " " + rhsRes + (this.irExprNum - 2);
+		}
+		else if (lhs === "t") {
+			formedIR = "t" + this.irExprNum + " = " + lhsRes + (this.irExprNum - 1) + " " + binop + " " + rhsRes;
+		}
+		else if (rhs === "t") {
+			formedIR = "t" + this.irExprNum + " = " + lhsRes + " " + binop + " " + rhsRes + (this.irExprNum - 1);
+		}
+		else {
+			formedIR = "t" + this.irExprNum + " = " + lhsRes + " " + binop + " " + rhsRes;
+		}
+
 		this.irExprNum++;
-		return irCode;
+		return formedIR;
 	},
+
 
 	block: function(subTree) {
 
@@ -280,7 +274,6 @@ Compiler.IRGenerator.prototype = {
 		if (exprRes === "t") {
 			irLine = "fjump t" + (this.irExprNum - 1) + " Label_" + tempUniqueLabelId;
 			this.finalIR.push(irLine);
-			console.log(irLine);
 		}
 		else {
 			if (exprRes instanceof AST.Identifier)
@@ -289,7 +282,6 @@ Compiler.IRGenerator.prototype = {
 				irLine = "fjump " + exprRes + " Label_" + tempUniqueLabelId;
 			
 			this.finalIR.push(irLine);
-			console.log(irLine);
 		}
 
 		this.block(subTree.bodyIf);
@@ -299,6 +291,10 @@ Compiler.IRGenerator.prototype = {
 			this.finalIR.push(irLine);
 
 			this.block(subTree.bodyElse);
+		}
+		else {
+			irLine = "Label_" + tempUniqueLabelId + ":";
+			this.finalIR.push(irLine);
 		}
 
 	},
@@ -332,7 +328,7 @@ Compiler.IRGenerator.prototype = {
 
 		this.block(subTree.body);
 
-		irLine = "jump Label_Test_" + tempUniqueLabelId;
+		irLine = "jump Label_Loop_Test_" + tempUniqueLabelId;
 		this.finalIR.push(irLine);
 		console.log(irLine);
 
