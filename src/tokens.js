@@ -28,7 +28,7 @@ Tokens.Tokentype = {
     OP_LESS_THAN_EQUAL_TO : 23,
     OP_GREATER_THAN : 24,
     OP_GREATER_THAN_EQUAL_TO : 25,
-    OP_NOT        : 26,
+    KEYWORD_NOT        : 26,
     SCOPE_START   : 27,
     SCOPE_END     : 28,
     LINE_TERMINATOR : 29,
@@ -98,7 +98,7 @@ Tokens.TokenString = {
             case 25:
                 return "Greater than equal to operator";
             case 26:
-                return "Not operator"
+                return "Not keyword"
             case 27:
                 return "Scope start";
             case 28:
