@@ -269,32 +269,49 @@ Compiler.IRGenerator.prototype = {
 		this.uniqueConditionalLabelId++;
 		var irLine;
 
-		var exprRes = this.expression(subTree.condition);
+		if (subTree instanceof AST.IfStatement) {
 
-		if (exprRes === "t") {
-			irLine = "fjump t" + (this.irExprNum - 1) + " Label_" + tempUniqueLabelId;
-			this.finalIR.push(irLine);
+			var exprRes = this.expression(subTree.condition);
+
+			if (exprRes === "t") {
+				irLine = "fjump t" + (this.irExprNum - 1) + " Label_" + tempUniqueLabelId;
+				this.finalIR.push(irLine);
+			}
+			else {
+				if (exprRes instanceof AST.Identifier)
+					irLine = "fjump " + exprRes.name + " Label_" + tempUniqueLabelId;
+				else
+					irLine = "fjump " + exprRes + " Label_" + tempUniqueLabelId;
+				
+				this.finalIR.push(irLine);
+			}
+
+			this.block(subTree.body);
+
+			this.finalIR.push("Label_" + tempUniqueLabelId + ":");
 		}
-		else {
-			if (exprRes instanceof AST.Identifier)
-				irLine = "fjump " + exprRes.name + " Label_" + tempUniqueLabelId;
-			else
-				irLine = "fjump " + exprRes + " Label_" + tempUniqueLabelId;
+		else if (subTree instanceof AST.IfElseStatement) {
 			
-			this.finalIR.push(irLine);
-		}
+			var exprRes = this.expression(subTree.condition);
 
-		this.block(subTree.bodyIf);
+			if (exprRes === "t") {
+				irLine = "fjump t" + (this.irExprNum - 1) + " Label_Else_" + tempUniqueLabelId;
+				this.finalIR.push(irLine);
+			}
+			else {
+				if (exprRes instanceof AST.Identifier)
+					irLine = "fjump " + exprRes.name + " Label_Else_" + tempUniqueLabelId;
+				else
+					irLine = "fjump " + exprRes + " Label_Else" + tempUniqueLabelId;
+				
+				this.finalIR.push(irLine);
+			}
 
-		if (subTree instanceof AST.IfElseStatement) {
-			irLine = "Label_Else" + tempUniqueLabelId + ":";
-			this.finalIR.push(irLine);
+			this.block(subTree.bodyIf);
 
-			this.block(subTree.bodyElse);
-		}
-		else {
-			irLine = "Label_" + tempUniqueLabelId + ":";
-			this.finalIR.push(irLine);
+			this.finalIR.push("Label_Else_" + tempUniqueLabelId + ":");
+
+			this.block(subTree.bodyElse)
 		}
 
 	},
@@ -327,11 +344,7 @@ Compiler.IRGenerator.prototype = {
 		}
 
 		this.block(subTree.body);
-
-		irLine = "jump Label_Loop_Test_" + tempUniqueLabelId;
-		this.finalIR.push(irLine);
-		console.log(irLine);
-
+		
 		irLine = "Label_Loop_Test_End_" + tempUniqueLabelId + ":";
 		this.finalIR.push(irLine);
 		console.log(irLine);
