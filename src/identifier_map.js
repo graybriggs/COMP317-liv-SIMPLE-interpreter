@@ -7,11 +7,11 @@ var IdentMap = (function(){
     var identifiers = [];
     
     return {
-        dbgPrintIdentMap() {
+        dbgPrintIdentMap: function() {
             console.log(identifiers);
         },
         addIdent: function(name, type, value) {
-            identifiers[name] = [type : value];
+            identifiers[name] = [type, value];
         },
         getIdentValue: function(name) {
             return identifiers[name];
