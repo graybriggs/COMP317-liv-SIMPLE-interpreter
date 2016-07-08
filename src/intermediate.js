@@ -344,8 +344,9 @@ Compiler.IRGenerator.prototype = {
 		}
 
 		this.block(subTree.body);
-		
-		irLine = "Label_Loop_Test_End_" + tempUniqueLabelId + ":";
+		irLine = "jump Label_Loop_Test_" + tempUniqueLabelId + ":";
+		this.finalIR.push(irLine);
+		irLine = "Label_Loop_End_" + tempUniqueLabelId + ":";
 		this.finalIR.push(irLine);
 		console.log(irLine);
 	}
