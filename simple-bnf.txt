@@ -8,13 +8,13 @@
 <ident-char> ::= [a-zA-Z] | _
 <variable> ::= <ident-char><variable> | <variable><numeral>
 
-<expression> ::= <numeral> | -<expression> | <expression> + <expression>
+<expression> ::= <numeral> | <variable> | -<expression> | <expression> + <expression>
 		| <expression> - <expression> | <expression> * <expression>
 	    	| <expression> > <expression> | <expression> >= <expression>
 	    	| <expression> < <expression> | <expression> <= <expression>
 	     	| <expression> == <expresion>
-		| !<expression
-		| <method-body> | call <function-name>
+		| not <expression>
+		| <method-body> | <function-name>
 
 
 <program> ::= skip | <variable> := <expression>;
@@ -29,9 +29,9 @@
 <array-decl> ::= <variable> := [<numeral>]
 <array-access> ::= <variable>[<expression>]
 
-<fun-arguments> ::= <variable> | <variable>, <function-arguments> | skip
+<fun-arguments> ::= <expression> | <fun-arguments>, <function-arguments>
 <fun-name> ::= <ident-char><fun-name> | <fun-name><numeral>
-<function> ::= function <function-name> (<function-arguments>) { <program> }
+<function> ::= function <function-name> () { <program> } | function <function-name> (<function-arguments>) { <program> }
 
 <method-body> ::= do { <program> return <expression> }
 
