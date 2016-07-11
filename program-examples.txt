@@ -14,6 +14,8 @@ while (someInt > someReal) {
 }
 
 ------------------------
+// Extended Language
+------------------------
 
 function aNumber() {
   return 5;
