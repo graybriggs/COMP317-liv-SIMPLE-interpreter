@@ -1,0 +1,40 @@
+
+<num> ::= [1-9] | 0
+<numeral> ::= <num><numeral>
+
+<char> ::= <ident-char> 
+<string> ::= "<char>" | "<char><string>" | "<numeral><string>"
+
+<ident-char> ::= [a-zA-Z] | _
+<variable> ::= <ident-char><variable> | <variable><numeral>
+
+<expression> ::= <numeral> | <variable> | -<expression> | <expression> + <expression>
+		| <expression> - <expression> | <expression> * <expression>
+	    	| <expression> > <expression> | <expression> >= <expression>
+	    	| <expression> < <expression> | <expression> <= <expression>
+	     	| <expression> == <expresion>
+		| not <expression>
+		| <method-body> | <function-name>
+
+
+<program> ::= skip | <variable> := <expression>;
+	      | <program> <program>
+	      | if (<expression>) { <program> } else { <program> }
+	      | while (<expression>) { <program> }
+
+// extended
+
+<expression> ::= <expression> && <expression> | <expression> || <expression>
+
+<array-decl> ::= <variable> := [<numeral>]
+<array-access> ::= <variable>[<expression>]
+
+<fun-arguments> ::= <expression> | <fun-arguments>, <function-arguments>
+<fun-name> ::= <ident-char><fun-name> | <fun-name><numeral>
+<function> ::= function <function-name> () { <program> } | function <function-name> (<function-arguments>) { <program> }
+
+<method-body> ::= do { <program> return <expression> }
+
+<throw> ::= throwException(<string>)
+<exception> ::= try { <program> } catchException { <program> }
+
