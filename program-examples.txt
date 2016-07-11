@@ -15,7 +15,7 @@ while (someInt > someReal) {
 
 ------------------------
 
-function aNumber(skip) {
+function aNumber() {
   return 5;
 }
 
@@ -23,8 +23,8 @@ function doubleMe(number) {
   return 2 * number;
 }
 
-num := call aNumber;
-result := call doubleMe(num);
+num := aNumber;
+result := doubleMe(num);
 
 -------------------------
 
