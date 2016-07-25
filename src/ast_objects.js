@@ -22,6 +22,11 @@ AST.Real = function(val) {
     this.value = val;
 }
 
+AST.Negative = function(expr) {
+
+    this.expr = expr;
+}
+
 AST.Addition = function(lhs, rhs) {
     
     this.lhs = lhs;
@@ -59,6 +64,10 @@ AST.Modulus = function(lhs, rhs) {
 
 AST.Expression = function(expr) {
 
+    this.expr = expr;
+}
+
+AST.NotKeyword = function(expr) {
     this.expr = expr;
 }
 

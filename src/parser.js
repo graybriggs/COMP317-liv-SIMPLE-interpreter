@@ -91,11 +91,12 @@ Compiler.Parser.prototype = {
 	    // optional
 	    if (this.expect(Tokens.Tokentype.MINUS)) {
 	        this.accept(Tokens.Tokentype.MINUS);
+	        console.log("accepted a negative...");
+	        var expr = this.expression();
 
-	        this.factor();
+	        return new AST.Negative(expr);
 	    }
-	    
-	    if (this.accept(Tokens.Tokentype.INTEGER)) {
+	    else if (this.accept(Tokens.Tokentype.INTEGER)) {
 	        return new AST.Integer(parseInt(this.getPreviousToken()));
 	    }
 	    else if (this.accept(Tokens.Tokentype.REAL)) {
@@ -104,10 +105,9 @@ Compiler.Parser.prototype = {
 	    else if (this.accept(Tokens.Tokentype.IDENTIFIER)) {
 	        
 	        console.log("ident: " + this.getPreviousToken());
-			//console.log(identMap.dbgPrintIdentMap());
+			console.log(IdentMap.dbgPrintIdentMap());
 	        
-	        //var idVal = getIdentValue(this.getPreviousToken());
-	        //var idVal = identMap.getIdentValue(this.getPreviousToken());
+	        var idVal = IdentMap.getIdentValue(this.getPreviousToken());
 	        
 			var idVal = this.getPreviousToken();
 	        console.log("Idval: ");
@@ -222,6 +222,9 @@ Compiler.Parser.prototype = {
 
 				if (this.accept(Tokens.Tokentype.OP_EQUIVALENT)) {
 	                var rhs = this.logicalOperator();
+	                if (rhs === "undefined") {
+	                	throw "Expected value or identifier at " + this.getCurrentToken().row + ", " + this.getCurrentToken().col;
+	                }
 	                operator = new AST.BoolOpEquivalent(lhs, rhs);
 	            }
 	            else if (this.accept(Tokens.Tokentype.OP_NOT_EQUIVALENT)) {
@@ -268,16 +271,14 @@ Compiler.Parser.prototype = {
 		var variableAssignment = null;
 
 	    if (this.accept(Tokens.Tokentype.IDENTIFIER)) {
-	        console.log("var lhs is: " + this.getPreviousToken());
 	        var identTokenName = this.getPreviousToken();
 	        
 	        if (this.accept(Tokens.Tokentype.OP_ASSIGNMENT)) {
 	            var expResult = this.parseExpression();
 	            
 	            if(!this.accept(Tokens.Tokentype.LINE_TERMINATOR)) {
-	                errorRowColumn(this, "Missing terminator at");
+	                Error.errorRowColumn(this, "Missing terminator at");
 	            }
-	            console.log("Well formed variable assignment.");
 	            //identMap.addIdent(identTokenName, expResult);
 	        }
 	        else {
@@ -289,7 +290,8 @@ Compiler.Parser.prototype = {
 	        console.log(variableAssignment);
 	    }
 	    else {
-	        errorRowColumn(this, "Missing terminator at");
+	        //errorRowColumn(this, "Missing terminator at");
+	        throw "Missing terminator at " + row + "," + column;
 	    }
 
 	    //return identTokenName;
