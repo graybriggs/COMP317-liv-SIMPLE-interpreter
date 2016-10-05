@@ -73,10 +73,10 @@ Compiler.IRGenerator.prototype = {
 			return subTree.value;
 		}
 		else if (subTree instanceof AST.Identifier) {
-			return subTree;
+			return subTree.name;
 		}
 		else if (subTree instanceof AST.Addition ||
-				 subTree instanceof AST.Multiplication ||
+				   subTree instanceof AST.Multiplication ||
 			     subTree instanceof AST.Subtraction ||
 			     subTree instanceof AST.Division ||
 			     subTree instanceof AST.Modulus ||
@@ -294,6 +294,8 @@ Compiler.IRGenerator.prototype = {
 			
 			var exprRes = this.expression(subTree.condition);
 
+			var ifElseEndUID = tempUniqueLabelId;
+
 			if (exprRes === "t") {
 				irLine = "fjump t" + (this.irExprNum - 1) + " Label_Else_" + tempUniqueLabelId;
 				this.finalIR.push(irLine);
@@ -309,9 +311,14 @@ Compiler.IRGenerator.prototype = {
 
 			this.block(subTree.bodyIf);
 
+			irLine = "jump Label_End_" + ifElseEndUID + ":";
+			this.finalIR.push(irLine);
+
 			this.finalIR.push("Label_Else_" + tempUniqueLabelId + ":");
 
-			this.block(subTree.bodyElse)
+			this.block(subTree.bodyElse);
+
+			this.finalIR.push("Label_End_" + ifElseEndUID + ":");
 		}
 
 	},
