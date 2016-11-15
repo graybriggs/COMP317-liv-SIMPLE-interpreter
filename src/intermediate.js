@@ -5,8 +5,6 @@
 
 'use strict';
 
-//var sequentialExpression = [];
-
 Compiler.IRGenerator = function() {
 
 	console.log("--- Generating IR ---");
@@ -16,6 +14,7 @@ Compiler.IRGenerator = function() {
 	this.sequentialExpression = [];
 	this.finalIR = [];
 
+	this.irNodeNumber = 0;
 	this.irExprNum = 0;
 };
 
@@ -45,13 +44,23 @@ Compiler.IRGenerator.prototype = {
 		var lhsId = this.identifier(subTree);
 		var expRes = this.expression(subTree.expr);
 
-		if (expRes === "t")	 {
-			console.log(lhsId + " ASSIGN t" + (this.irExprNum - 1));
-			this.finalIR.push(lhsId + " ASSIGN t" + (this.irExprNum - 1));
+		if (expRes === "$")	 {
+			console.log(lhsId + " ASSIGN $" + (this.irExprNum - 1));
+			//this.finalIR.push(lhsId + " ASSIGN $" + (this.irExprNum - 1));
+
+			var rhs = "$" + (this.irExprNum - 1);
+
+			var assignmentObject = new IR.Assignment(this.irNodeNumber, lhsId, rhs);
+
+			this.finalIR.push(assignmentObject);
 		}
 		else {
 			console.log(lhsId + " ASSIGN " + expRes);
-			this.finalIR.push(lhsId + " ASSIGN " + expRes);
+
+			var assignmentObject = new IR.Assignment(this.irNodeNumber++, lhsId, expRes);
+
+			//this.finalIR.push(lhsId + " ASSIGN " + expRes);
+			this.finalIR.push(assignmentObject);
 		}
 
 		return null;
@@ -67,10 +76,12 @@ Compiler.IRGenerator.prototype = {
 		console.log(subTree);
 
 		if (subTree instanceof AST.Integer) {
-			return subTree.value;
+			//return subTree.value;
+			return "&lt;integer, " + subTree.value + "&gt";
 		}
 		else if (subTree instanceof AST.Real) {
-			return subTree.value;
+			//return subTree.value;
+			return "&lt;real, " + subTree.value + "&gt";
 		}
 		else if (subTree instanceof AST.Identifier) {
 			return subTree.name;
@@ -94,6 +105,7 @@ Compiler.IRGenerator.prototype = {
 					var rhs = this.expression(subTree.rhs);
 
 					var irRes = this.produceExpressionIR(lhs, rhs, "ADD");
+
 					this.finalIR.push(irRes);
 
 					break;
@@ -182,7 +194,7 @@ Compiler.IRGenerator.prototype = {
 					break;
 				
 			}
-			return "t";
+			return "$";
 		}
 		return this.exprNum;
 	},
@@ -191,13 +203,17 @@ Compiler.IRGenerator.prototype = {
 
 		// if an identifier is found then get its name
 		var lhsRes;
+		var rhsRes;
+
+		//////
+
 		if (lhs instanceof AST.Identifier) {
 			lhsRes = lhs.name;
 		}
 		else {
-			lhsRes = lhs;
+				lhsRes = lhs;
 		}
-		var rhsRes;
+
 		if (rhs instanceof AST.Identifier) {
 			rhsRes = rhs.name;
 		}
@@ -206,29 +222,33 @@ Compiler.IRGenerator.prototype = {
 		}
 
 		// handle compound expressions by breaking them into triples and keep track using temporary variables.
+		// all temporaries are a number preceded by $.
 
 		var formedIR;
-		if (lhs === "t" && rhs === "t") {
-			formedIR = "t" + this.irExprNum + " = " + lhsRes + (this.irExprNum - 1) + " " + binop + " " + rhsRes + (this.irExprNum - 2);
+		if (lhs === "$" && rhs === "$") {
+			formedIR = "$" + this.irExprNum + " = " + lhsRes + (this.irExprNum - 1) + " " + binop + " " + rhsRes + (this.irExprNum - 2);
 		}
-		else if (lhs === "t") {
-			formedIR = "t" + this.irExprNum + " = " + lhsRes + (this.irExprNum - 1) + " " + binop + " " + rhsRes;
+		else if (lhs === "$") {
+			formedIR = "$" + this.irExprNum + " = " + lhsRes + (this.irExprNum - 1) + " " + binop + " " + rhsRes;
 		}
-		else if (rhs === "t") {
-			formedIR = "t" + this.irExprNum + " = " + lhsRes + " " + binop + " " + rhsRes + (this.irExprNum - 1);
+		else if (rhs === "$") {
+			formedIR = "$" + this.irExprNum + " = " + lhsRes + " " + binop + " " + rhsRes + (this.irExprNum - 1);
 		}
 		else {
-			formedIR = "t" + this.irExprNum + " = " + lhsRes + " " + binop + " " + rhsRes;
+			formedIR = "$" + this.irExprNum + " = " + lhsRes + " " + binop + " " + rhsRes;
 		}
 
+		var expObj = new IR.Expression(this.irNodeNumber++, formedIR);
+
 		this.irExprNum++;
-		return formedIR;
+		//return formedIR;
+		return expObj;
 	},
 
 
 	block: function(subTree) {
 
-		console.log("IR - here");
+		console.log("IR - In Block");
 
 		if (subTree instanceof AST.Block) {
 			console.log(subTree.subBlock);
@@ -273,22 +293,28 @@ Compiler.IRGenerator.prototype = {
 
 			var exprRes = this.expression(subTree.condition);
 
-			if (exprRes === "t") {
-				irLine = "fjump t" + (this.irExprNum - 1) + " Label_" + tempUniqueLabelId;
-				this.finalIR.push(irLine);
+			if (exprRes === "$") {
+				irLine = "fjump $" + (this.irExprNum - 1) + " Label_" + tempUniqueLabelId;
+				//this.finalIR.push(irLine);
+				var jumpObj = new IR.Jump(irLine);
+				this.finalIR.push(jumpObj);
 			}
 			else {
-				if (exprRes instanceof AST.Identifier)
+				if (exprRes instanceof AST.Identifier) {
 					irLine = "fjump " + exprRes.name + " Label_" + tempUniqueLabelId;
-				else
+				}
+				else {
 					irLine = "fjump " + exprRes + " Label_" + tempUniqueLabelId;
-				
-				this.finalIR.push(irLine);
+					var jumpObj = new IR.Jump(this.irNodeNumber++, irLine);
+					this.finalIR.push(jumpObj);
+				}
 			}
 
 			this.block(subTree.body);
 
-			this.finalIR.push("Label_" + tempUniqueLabelId + ":");
+			var labelIR = "Label_" + tempUniqueLabelId + ":";
+			var labelObj = new IR.Label(this.irNodeNumber++, labelIR);
+			this.finalIR.push(labelObj);
 		}
 		else if (subTree instanceof AST.IfElseStatement) {
 			
@@ -296,29 +322,35 @@ Compiler.IRGenerator.prototype = {
 
 			var ifElseEndUID = tempUniqueLabelId;
 
-			if (exprRes === "t") {
-				irLine = "fjump t" + (this.irExprNum - 1) + " Label_Else_" + tempUniqueLabelId;
-				this.finalIR.push(irLine);
+			if (exprRes === "$") {
+				irLine = "fjump $" + (this.irExprNum - 1) + " Label_Else_" + tempUniqueLabelId;
+				var jumpObj = new IR.Jump(this.irNodeNumber++, irLine);
+				this.finalIR.push(jumpObj);
 			}
 			else {
 				if (exprRes instanceof AST.Identifier)
 					irLine = "fjump " + exprRes.name + " Label_Else_" + tempUniqueLabelId;
 				else
-					irLine = "fjump " + exprRes + " Label_Else" + tempUniqueLabelId;
+					irLine = "fjump " + exprRes + " Label_Else_" + tempUniqueLabelId;
 				
-				this.finalIR.push(irLine);
+				var jmpObj = new IR.Jump(this.irNodeNumber++, irLine);
+				this.finalIR.push(jmpObj);
 			}
 
 			this.block(subTree.bodyIf);
 
 			irLine = "jump Label_End_" + ifElseEndUID + ":";
-			this.finalIR.push(irLine);
+			var jmpObj = new IR.Jump(this.irNodeNumber++, irLine);
+			this.finalIR.push(jmpObj);
 
-			this.finalIR.push("Label_Else_" + tempUniqueLabelId + ":");
+			irLine = "Label_Else_" + tempUniqueLabelId + ":";
+			var lblObj = new IR.Label(this.irNodeNumber++, irLine);
+			this.finalIR.push(lblObj);
 
 			this.block(subTree.bodyElse);
 
-			this.finalIR.push("Label_End_" + ifElseEndUID + ":");
+			lblObj = new IR.Label(this.irNodeNumber++, "Label_End_" + ifElseEndUID + ":")
+			this.finalIR.push(lblObj);
 		}
 
 	},
@@ -335,8 +367,8 @@ Compiler.IRGenerator.prototype = {
 
 		var exprRes = this.expression(subTree.condition);
 
-		if (exprRes === "t") {
-			irLine = "fjump t" + (this.irExprNum - 1) + " Label_Loop_End_" + tempUniqueLabelId;
+		if (exprRes === "$") {
+			irLine = "fjump $" + (this.irExprNum - 1) + " Label_Loop_End_" + tempUniqueLabelId;
 			this.finalIR.push(irLine);
 			console.log(irLine);
 		}
