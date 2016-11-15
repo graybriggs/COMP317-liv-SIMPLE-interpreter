@@ -362,14 +362,17 @@ Compiler.IRGenerator.prototype = {
 		var irLine;
 
 		irLine = "Label_Loop_Test_" + tempUniqueLabelId + ":";
-		this.finalIR.push(irLine);
+		var lblObj = new IR.Label(this.irNodeNumber++, irLine);
+		this.finalIR.push(lblObj);
+		
 		console.log(irLine);
 
 		var exprRes = this.expression(subTree.condition);
 
 		if (exprRes === "$") {
 			irLine = "fjump $" + (this.irExprNum - 1) + " Label_Loop_End_" + tempUniqueLabelId;
-			this.finalIR.push(irLine);
+			var lblObj = new IR.Label(this.irNodeNumber++, irLine);
+			this.finalIR.push(lblObj);
 			console.log(irLine);
 		}
 		else {
@@ -378,15 +381,22 @@ Compiler.IRGenerator.prototype = {
 			else
 				irLine = "fjump " + exprRes + " Label_Loop_End_" + tempUniqueLabelId;
 			
-			this.finalIR.push(irLine);
+			var jmpObj = new IR.Jump(this.irNodeNumber++, irLine);
+
+			this.finalIR.push(jmpObj);
 			console.log(irLine);
 		}
 
 		this.block(subTree.body);
+
 		irLine = "jump Label_Loop_Test_" + tempUniqueLabelId + ":";
-		this.finalIR.push(irLine);
+		var jumpObj = new IR.Jump(this.irNodeNumber++, irLine);
+		this.finalIR.push(jumpObj);
+
 		irLine = "Label_Loop_End_" + tempUniqueLabelId + ":";
-		this.finalIR.push(irLine);
+		var lblEndObj = new IR.Label(this.irNodeNumber++, irLine);
+		this.finalIR.push(lblEndObj);
+
 		console.log(irLine);
 	}
 
