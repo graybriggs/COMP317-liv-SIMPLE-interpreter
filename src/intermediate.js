@@ -50,7 +50,7 @@ Compiler.IRGenerator.prototype = {
 
 			var rhs = "$" + (this.irExprNum - 1);
 
-			var assignmentObject = new IR.Assignment(this.irNodeNumber, lhsId, rhs);
+			var assignmentObject = new IR.Assignment(this.irNodeNumber++, lhsId, rhs);
 
 			this.finalIR.push(assignmentObject);
 		}
@@ -296,7 +296,7 @@ Compiler.IRGenerator.prototype = {
 			if (exprRes === "$") {
 				irLine = "fjump $" + (this.irExprNum - 1) + " Label_" + tempUniqueLabelId;
 				//this.finalIR.push(irLine);
-				var jumpObj = new IR.Jump(irLine);
+				var jumpObj = new IR.Jump(this.irNodeNumber++, irLine);
 				this.finalIR.push(jumpObj);
 			}
 			else {
