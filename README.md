@@ -1,4 +1,4 @@
-Doesn't optimize. Translates to interediate representation.
+Doesn't optimize. Translates to intermediate representation.
 
 # Optimizing Compiler
 
