@@ -1,3 +1,5 @@
+Doesn't optimize. Translates to interediate representation.
+
 # Optimizing Compiler
 
 This project is an optimizing compiler for a rudimentary Turing complete programming language that contains simple program constructs such as variable declarations, code blocks, loops and conditional statements. The optimized code that is generated is verified to be semantically equivalent to its unoptimized form.
